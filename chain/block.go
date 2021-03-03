@@ -1,6 +1,11 @@
 package chain
 
-import "time"
+import (
+	"2021/_03_公链/XianFengChain04/utils"
+	"bytes"
+	"crypto/sha256"
+	"time"
+)
 
 /**
 *区块的结构体定义 ：版上默时难随
@@ -16,12 +21,35 @@ type Block struct {
 	Nonce int64 //随机数
 	Data  []byte
 }
-
-func CreateGenesis(data []byte) Block {
-	gensis := NewBlock(0, [32]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, nil)
-	gensis.Height = 0
-return gensis
+/**
+*计算区块哈希的功能函数
+ */
+func(block *Block) CalculateBlockHash()  {
+	heightByte,_ := utils.Int2Byte(block.Height)
+	versionByte,_ :=utils.Int2Byte(block.Version)
+	timeByte,_ := utils.Int2Byte(block.TimeStamp)
+	nonceByte,_:= utils.Int2Byte(block.Nonce)
+	blockByte :=bytes.Join([][]byte{heightByte,versionByte,timeByte,nonceByte,block.Data,block.PrevHash[:]},nil)
+	block.Hash = sha256.Sum256(blockByte)
 }
+/**
+*创建创世区块
+ */
+func CreateGenesis(data []byte) Block {
+	gensis := Block{
+		Height:   0,
+		Version:  0x00,
+		PrevHash:     [32]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		TimeStamp: time.Now().Unix(),
+		Data:      data,
+	}
+	//todo 寻找并设置nonce 计算并设置hash
+	gensis.CalculateBlockHash()
+	return gensis
+}
+
+
+
 
 /**
 *生成新区块的功能函数
@@ -35,7 +63,8 @@ func NewBlock(height int64, prev [32]byte, data []byte) Block {
 		TimeStamp: time.Now().Unix(),
 		Data:      data,
 	}
-
 	//todo 设置哈希，寻找并设置随机数
+	block.CalculateBlockHash()
+
 	return block
 }

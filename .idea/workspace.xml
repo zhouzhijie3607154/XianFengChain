@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="83f81a4e-b8e3-4317-8d61-55513b2fbaf8" name="Default Changelist" comment="" />
+    <list default="true" id="83f81a4e-b8e3-4317-8d61-55513b2fbaf8" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/utils/convert.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chain/block.go" beforeDir="false" afterPath="$PROJECT_DIR$/chain/block.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -19,6 +24,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1pEdGRFcHlzs1dK9GM2ATL1QUrY" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showExcludedFiles" value="true" />
@@ -31,6 +37,12 @@
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
   </component>
   <component name="RunManager">
     <configuration name="go build 2021/_03_公链/XianFengChain04" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
@@ -63,25 +75,25 @@
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state x="752" y="248" key="FileChooserDialogImpl/0.0.1536.864@0.0.1536.864" timestamp="1614752126482" />
-    <state width="998" height="189" key="GridCell.Tab.0.bottom" timestamp="1614753540009">
+    <state width="1032" height="189" key="GridCell.Tab.0.bottom" timestamp="1614755350625">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state width="998" height="189" key="GridCell.Tab.0.bottom/0.0.1536.864@0.0.1536.864" timestamp="1614753540009" />
-    <state width="998" height="189" key="GridCell.Tab.0.center" timestamp="1614753540009">
+    <state width="1032" height="189" key="GridCell.Tab.0.bottom/0.0.1536.864@0.0.1536.864" timestamp="1614755350625" />
+    <state width="1032" height="189" key="GridCell.Tab.0.center" timestamp="1614755350625">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state width="998" height="189" key="GridCell.Tab.0.center/0.0.1536.864@0.0.1536.864" timestamp="1614753540009" />
-    <state width="998" height="189" key="GridCell.Tab.0.left" timestamp="1614753540009">
+    <state width="1032" height="189" key="GridCell.Tab.0.center/0.0.1536.864@0.0.1536.864" timestamp="1614755350625" />
+    <state width="1032" height="189" key="GridCell.Tab.0.left" timestamp="1614755350625">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state width="998" height="189" key="GridCell.Tab.0.left/0.0.1536.864@0.0.1536.864" timestamp="1614753540009" />
-    <state width="998" height="189" key="GridCell.Tab.0.right" timestamp="1614753540009">
+    <state width="1032" height="189" key="GridCell.Tab.0.left/0.0.1536.864@0.0.1536.864" timestamp="1614755350625" />
+    <state width="1032" height="189" key="GridCell.Tab.0.right" timestamp="1614755350625">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state width="998" height="189" key="GridCell.Tab.0.right/0.0.1536.864@0.0.1536.864" timestamp="1614753540009" />
-    <state x="929" y="185" width="672" height="678" key="search.everywhere.popup" timestamp="1614752324086">
+    <state width="1032" height="189" key="GridCell.Tab.0.right/0.0.1536.864@0.0.1536.864" timestamp="1614755350625" />
+    <state x="930" y="185" width="672" height="678" key="search.everywhere.popup" timestamp="1614754150761">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state x="929" y="185" width="672" height="678" key="search.everywhere.popup/0.0.1536.864@0.0.1536.864" timestamp="1614752324086" />
+    <state x="930" y="185" width="672" height="678" key="search.everywhere.popup/0.0.1536.864@0.0.1536.864" timestamp="1614754150761" />
   </component>
 </project>
