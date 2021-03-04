@@ -14,7 +14,7 @@ type PoW struct {
 	Target *big.Int
 }
 
-func (pow PoW) FindNonce() int64 {
+func (pow PoW) FindNonce() (int64,[32]byte) {
 	//给定一个nonce值，计算区块hash
 	var nonce int64
 	nonce = 0
@@ -27,7 +27,7 @@ func (pow PoW) FindNonce() int64 {
 		//比较大小
 		hashBig = hashBig.SetBytes(hash[:])
 		if hashBig.Cmp(target)== -1{
-			return nonce
+			return nonce,hash
 		}
 		nonce++
 	}

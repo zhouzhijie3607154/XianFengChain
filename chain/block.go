@@ -2,9 +2,6 @@ package chain
 
 import (
 	"2021/_03_公链/XianFengChain04/consensus"
-	"2021/_03_公链/XianFengChain04/utils"
-	"bytes"
-	"crypto/sha256"
 	"time"
 )
 
@@ -23,17 +20,6 @@ type Block struct {
 	Data  []byte
 }
 
-/**
-*计算区块哈希的功能函数
- */
-func (block *Block) CalculateBlockHash() {
-	heightByte, _ := utils.Int2Byte(block.Height)
-	versionByte, _ := utils.Int2Byte(block.Version)
-	timeByte, _ := utils.Int2Byte(block.TimeStamp)
-	nonceByte, _ := utils.Int2Byte(block.Nonce)
-	blockByte := bytes.Join([][]byte{heightByte, versionByte, timeByte, nonceByte, block.Data, block.PrevHash[:]}, nil)
-	block.Hash = sha256.Sum256(blockByte)
-}
 
 /**
 *创建创世区块
@@ -46,10 +32,10 @@ func CreateGenesis(data []byte) Block {
 		TimeStamp: time.Now().Unix(),
 		Data:      data,
 	}
-	//todo 寻找并设置nonce 计算并设置hash
+	//调用PoW共识算法，寻找随机数，计算哈希值
 	proof := consensus.NewPow(gensis)
-	gensis.Nonce = proof.FindNonce()
-	gensis.CalculateBlockHash()
+	gensis.Nonce,gensis.Hash = proof.FindNonce()
+
 	return gensis
 }
 
@@ -65,11 +51,9 @@ func NewBlock(height int64, prev [32]byte, data []byte) Block {
 		TimeStamp: time.Now().Unix(),
 		Data:      data,
 	}
-	//todo 寻找并设置随机数，设置哈希，
+	//调用PoW共识算法，寻找随机数，计算哈希值
 	proof := consensus.NewPow(block)
-	block.Nonce = proof.FindNonce()
-	block.CalculateBlockHash()
-
+	block.Nonce,block.Hash = proof.FindNonce()
 	return block
 }
 

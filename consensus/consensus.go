@@ -8,7 +8,7 @@ import (
 *定义区块链中使用的共识算法 接口
  */
 type Consensus interface {
-	FindNonce() int64
+	FindNonce() (int64 ,[32]byte)
 }
 /**
 *定义区块结构体的接口标准
