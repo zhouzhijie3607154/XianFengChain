@@ -22,25 +22,27 @@ type Block struct {
 	Nonce int64 //随机数
 	Data  []byte
 }
+
 /**
 *计算区块哈希的功能函数
  */
-func(block *Block) CalculateBlockHash()  {
-	heightByte,_ := utils.Int2Byte(block.Height)
-	versionByte,_ :=utils.Int2Byte(block.Version)
-	timeByte,_ := utils.Int2Byte(block.TimeStamp)
-	nonceByte,_:= utils.Int2Byte(block.Nonce)
-	blockByte :=bytes.Join([][]byte{heightByte,versionByte,timeByte,nonceByte,block.Data,block.PrevHash[:]},nil)
+func (block *Block) CalculateBlockHash() {
+	heightByte, _ := utils.Int2Byte(block.Height)
+	versionByte, _ := utils.Int2Byte(block.Version)
+	timeByte, _ := utils.Int2Byte(block.TimeStamp)
+	nonceByte, _ := utils.Int2Byte(block.Nonce)
+	blockByte := bytes.Join([][]byte{heightByte, versionByte, timeByte, nonceByte, block.Data, block.PrevHash[:]}, nil)
 	block.Hash = sha256.Sum256(blockByte)
 }
+
 /**
 *创建创世区块
  */
 func CreateGenesis(data []byte) Block {
 	gensis := Block{
-		Height:   0,
-		Version:  0x00,
-		PrevHash:     [32]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		Height:    0,
+		Version:   0x00,
+		PrevHash:  [32]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 		TimeStamp: time.Now().Unix(),
 		Data:      data,
 	}
@@ -50,9 +52,6 @@ func CreateGenesis(data []byte) Block {
 	gensis.CalculateBlockHash()
 	return gensis
 }
-
-
-
 
 /**
 *生成新区块的功能函数
@@ -72,4 +71,21 @@ func NewBlock(height int64, prev [32]byte, data []byte) Block {
 	block.CalculateBlockHash()
 
 	return block
+}
+
+//实现接口 BlockInterface
+func (block Block) GetHeight() int64 {
+	return block.Height
+}
+func (block Block) GetVersion() int64 {
+	return block.Version
+}
+func (block Block) GetTimeStamp() int64 {
+	return block.TimeStamp
+}
+func (block Block) GetPreHash() [32]byte {
+	return block.PrevHash
+}
+func (block Block) GetData() []byte {
+	return block.Data
 }

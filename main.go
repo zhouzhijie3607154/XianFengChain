@@ -10,6 +10,6 @@ func main() {
 	block0 := chain.CreateGenesis([]byte("Hello World !"))
 	block1 := chain.NewBlock(block0.Height, block0.Hash, []byte("OK！"))
 
-	fmt.Println(block0)
-	fmt.Println(block1)
+	fmt.Printf("%+v",block0)
+	fmt.Printf("%+v",block1)
 }
