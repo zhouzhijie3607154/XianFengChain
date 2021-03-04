@@ -1,6 +1,7 @@
 package chain
 
 import (
+	"2021/_03_公链/XianFengChain04/consensus"
 	"2021/_03_公链/XianFengChain04/utils"
 	"bytes"
 	"crypto/sha256"
@@ -44,6 +45,8 @@ func CreateGenesis(data []byte) Block {
 		Data:      data,
 	}
 	//todo 寻找并设置nonce 计算并设置hash
+	proof := consensus.NewPow(gensis)
+	gensis.Nonce = proof.FindNonce()
 	gensis.CalculateBlockHash()
 	return gensis
 }
@@ -63,7 +66,9 @@ func NewBlock(height int64, prev [32]byte, data []byte) Block {
 		TimeStamp: time.Now().Unix(),
 		Data:      data,
 	}
-	//todo 设置哈希，寻找并设置随机数
+	//todo 寻找并设置随机数，设置哈希，
+	proof := consensus.NewPow(block)
+	block.Nonce = proof.FindNonce()
 	block.CalculateBlockHash()
 
 	return block
