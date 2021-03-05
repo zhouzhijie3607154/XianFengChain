@@ -2,6 +2,8 @@ package chain
 
 import (
 	"2021/_03_公链/XianFengChain04/consensus"
+	"bytes"
+	"encoding/gob"
 	"time"
 )
 
@@ -20,6 +22,17 @@ type Block struct {
 	Data  []byte
 }
 
+///**
+//*计算区块哈希的功能函数
+// */
+//func (block *Block) CalculateBlockHash() {
+//	heightByte, _ := utils.Int2Byte(block.Height)
+//	versionByte, _ := utils.Int2Byte(block.Version)
+//	timeByte, _ := utils.Int2Byte(block.TimeStamp)
+//	nonceByte, _ := utils.Int2Byte(block.Nonce)
+//	blockByte := bytes.Join([][]byte{heightByte, versionByte, timeByte, nonceByte, block.Data, block.PrevHash[:]}, nil)
+//	block.Hash = sha256.Sum256(blockByte)
+//}
 
 /**
 *创建创世区块
@@ -72,4 +85,26 @@ func (block Block) GetPreHash() [32]byte {
 }
 func (block Block) GetData() []byte {
 	return block.Data
+}
+/**
+区块的序列化方法 gob
+ */
+func (block Block)Serialize()([]byte,error){
+	//缓冲区
+	buff := new(bytes.Buffer)
+	encoder:= gob.NewEncoder(buff)
+	err := encoder.Encode(&block)
+	return buff.Bytes(),err
+}
+/**
+*区块反序列化功能函数
+*data ：区块的序列化后的数据
+*return 	@Block：data反序列化后的Block形态
+*			@error ：反序列化可能出现的错误
+ */
+func DeSerialize(data []byte)(Block,error){
+	var block Block
+	decoder := gob.NewDecoder(bytes.NewReader(data))
+	err := decoder.Decode(&block)
+	return block,err
 }
