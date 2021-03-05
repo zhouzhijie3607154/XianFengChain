@@ -22,4 +22,17 @@
     a、把已有的内存中的多个区块持久化存储起来 --->json、xml、gob（[]byte）
     b、[]byte -->读写（IO）-->持久化媒介：云、文件、数据库
             文件： Write、Read （IO.Writer 、IO.Reader ）
+                a、原生API （Application Programming Interface）：os.OpenFile /  os.Open  Write写数据 Reader读数据
+                优点：最原始、最底层的技术支持
+                缺点：易用性低
+
+                b、第三方SDK（Software Development Kit）：boltDB
+                优点：效率高、封装性好
+                缺点：仅提供某些特定方向的技术支持
+                用法： 先搞明白第三方库的功能和使用步骤：
+                bolt.Open -> db.View 、db.Updata ->tx.CreateBucket -->put、get
+                       将第三方库集成到已有的项目中
+                            1、在项目中新建db模块、封装持久化存储功能
+                            2、
+
 ⑤ 多个节点进行数据同步
