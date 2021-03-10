@@ -20,13 +20,13 @@ func main() {
 	if err != nil {
 		log.Println("main.go第20行：",err.Error())
 	}
-	err = blockchain.CreateNewBlock([]byte("hello"))
-	if err != nil {
-		log.Println("main.go第24行",err.Error())
-	}
-	lastBlock := blockchain.GetLastBlock()
-
-	fmt.Printf("最新区块：%+v\n",lastBlock)
+	//err = blockchain.CreateNewBlock([]byte("hello I'm fifth block"))
+	//if err != nil {
+	//	log.Println("main.go第24行",err.Error())
+	//}
+	//lastBlock := blockchain.GetLastBlock()
+	//
+	//fmt.Printf("最新区块：%+v\n",lastBlock)
 	blocks,err := blockchain.GetAllBlocks()
 	if err  != nil {
 		log.Println("main.go 第34行",err.Error())
@@ -34,7 +34,12 @@ func main() {
 	for _,v :=range blocks{
 		fmt.Printf("第%d个区块，%s\n",v.Height,v.Data)
 	}
+fmt.Println("___________________________________________________")
 
+	for blockchain.HasNext(){
+	block := blockchain.Next()
+	fmt.Printf("第%+v个区块\n",block.Height)
+}
 	//blockChain := chain.CreateChainWithGensis([]byte("hello world！"))
 	//blockChain.CreateNewBlock([]byte("hello world ，too！"))
 	//fmt.Println(len(blockChain.Blocks))

@@ -41,3 +41,10 @@
 
 
 ⑤ 多个节点进行数据同步
+
+2021年3月10日14:59:16
+引入迭代器 BlockChain中添加IteratorBlockHash属性
+    ① IteratorBlockHash初始值为lastBlockHash
+迭代器(iterator):一种检查容器内元素并遍历元素的数据类型。
+又称游标cursor，是一种设计模式，它是一个对象，用可以遍历选择序列中的对象。
+通过它，开发者可以不需要了解该序列的底层结构

@@ -12,14 +12,16 @@ const LASTHASH = "lasthash"
 //定义区块链结构体
 type BlockChain struct {
 	//Blocks []Block
-	DB *bolt.DB
+	DB        *bolt.DB
 	LastBlock Block
+	IteratorBlockHash [32]byte//迭代器当前迭代到的区块的Hash
 }
 
 func CreateChain(db *bolt.DB) BlockChain {
 	return BlockChain{
 		DB:        db,
 		LastBlock: Block{},
+		IteratorBlockHash:[32]byte{},
 	}
 }
 
@@ -49,11 +51,13 @@ func (chain *BlockChain) CreateChainWithGensis(data []byte) error {
 			bucket.Put(genesis.Hash[:], genesisBytes)
 			bucket.Put([]byte(LASTHASH), genesis.Hash[:])
 			chain.LastBlock = genesis
-		}else {
+			chain.IteratorBlockHash = genesis.Hash
+		} else {
 			//从文件当中读取出最新的区块，并赋值给chain.LastBlock
 			lastHash := bucket.Get([]byte(LASTHASH))
 			lastBlockBytes := bucket.Get(lastHash)
-			chain.LastBlock,err = DeSerialize(lastBlockBytes)
+			chain.LastBlock, err = DeSerialize(lastBlockBytes)
+			chain.IteratorBlockHash = chain.LastBlock.Hash
 			if err != nil {
 				return err
 			}
@@ -98,6 +102,7 @@ func (chain *BlockChain) CreateNewBlock(data []byte) error {
 			return err
 		}
 		chain.LastBlock = newBlock
+		chain.IteratorBlockHash = newBlock.Hash
 		return nil
 	})
 	return err
@@ -108,7 +113,7 @@ func (chain *BlockChain) CreateNewBlock(data []byte) error {
 @lastblock ：最新区块数据
 @err ：可能遇到的错误
 */
-func (chain *BlockChain) GetLastBlock() ( Block) {
+func (chain *BlockChain) GetLastBlock() Block {
 	return chain.LastBlock
 }
 
@@ -151,4 +156,53 @@ func (chain *BlockChain) GetAllBlocks() (blocks []Block, err error) {
 		return nil
 	})
 	return blocks, err
+}
+
+//实现接口：iterator的 HasNext方法，判断是否还有数据 true、false
+func (chain *BlockChain) HasNext() (hasNext bool) {
+	/*
+		1、当前区块在哪？->preHash ->db
+	*/
+
+	db := chain.DB
+	err := db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(BLOCKS))
+		if bucket == nil {
+			return errors.New("HasNext：区块数据文件操作失败，请重试")
+		}
+		preBlockBytes := bucket.Get(chain.IteratorBlockHash[:])
+		hasNext = len(preBlockBytes) != 0
+		return nil
+	})
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	return hasNext
+}
+
+//该方法用于实现iterator的Next方法，取出一个block
+func (chain *BlockChain) Next() (block Block) {
+	/*
+		1、知道当前在哪个区块-->找当前区块的上一个区块--->将找到的区块返回
+	*/
+
+	err := chain.DB.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(BLOCKS))
+		if bucket == nil {
+			return errors.New("BlockChain.Next：区块数据文件操作失败，请重试")
+		}
+		iteratorBlockBytes := bucket.Get(chain.IteratorBlockHash[:])
+		iteratorBlock, err := DeSerialize(iteratorBlockBytes)
+		if err != nil {
+			return err
+		}
+		chain.IteratorBlockHash = iteratorBlock.PrevHash
+		block = iteratorBlock
+		return nil
+	})
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	return block
 }
