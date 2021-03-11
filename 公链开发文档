@@ -48,3 +48,34 @@
 迭代器(iterator):一种检查容器内元素并遍历元素的数据类型。
 又称游标cursor，是一种设计模式，它是一个对象，用可以遍历选择序列中的对象。
 通过它，开发者可以不需要了解该序列的底层结构
+
+2021年3月10日16:11:44
+ src ————> build ————>run
+    XianFengChain04.exe -————>AddNewBlock(用户输入的数据)
+
+动态交互：机器与人交互：程序将相关新输出给用户
+         人与机器交互：用户动态指定一些程序执行的数据，程序能够接收并解析，按照用户的指令进行执行。
+ golang命令行参数：
+        实例：git commit -m "xxxx"
+          思路: go run main.go createBlock <data>
+          方案一 ： os.Args : 一个切片，该切片至少有一个元素，存放程序的路径。
+          方案二 ： flag.Args: flag.StringVar()/flag.String / flag.Int / flag.IntVar
+                       flag.NewFlagSet()
+                    flag.Parse()
+
+2021年3月10日17:07:59
+ 类比样例 go
+        bug         start a bug report
+        build       compile packages and dependencies
+        version     print Go version
+        vet         report likely mistakes in packages
+        统计已实现的功能：
+        1、generategensis 生成创世区块 -gensis 创世区块中的数据
+        2、generateblock  生成新区块  -data  新区块中的数据
+        3、getlastblock   获取最新区块
+        4、getallblocks   获取所有区块
+        go run main.go generategensis -
+2021年3月11日09:38:46
+继承命令行参数解析功能：
+    1、新建一个模块client
+    2、在client模块中

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/boltdb/bolt"
+	"math/big"
 )
 
 const BLOCKS = "blocks"
@@ -18,23 +19,40 @@ type BlockChain struct {
 }
 
 func CreateChain(db *bolt.DB) BlockChain {
+	var lastBlock Block
+	db.Update(func(tx *bolt.Tx) error {
+		bucket:= tx.Bucket([]byte(BLOCKS))
+		if bucket == nil {
+			bucket, _= tx.CreateBucket([]byte(BLOCKS))
+		}
+		lastHash:=bucket.Get([]byte(LASTHASH))
+		if len(lastHash)<= 0 {
+			return nil
+		}
+		//从文件当中读取出最新的区块，并赋值给chain.LastBlock
+		lastBlockBytes := bucket.Get(lastHash)
+		lastBlock, _= DeSerialize(lastBlockBytes)
+		return nil
+
+	})
 	return BlockChain{
 		DB:        db,
-		LastBlock: Block{},
-		IteratorBlockHash:[32]byte{},
+		LastBlock: lastBlock,
+		IteratorBlockHash:lastBlock.Hash,
 	}
 }
 
 //创建一个区块链对象，初始化一个创世区块
 func (chain *BlockChain) CreateChainWithGensis(data []byte) error {
+	flag := new(big.Int).SetBytes(chain.IteratorBlockHash[:]).Cmp(big.NewInt(0)) == 1
+	if flag {
+		return nil
+	}
 	var err error
 	err = chain.DB.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(BLOCKS))
 		if bucket == nil {
-			bucket, err = tx.CreateBucket([]byte(BLOCKS))
-			if err != nil {
-				return err
-			}
+			return  errors.New("操作区块链数据文件异常！")
 		}
 		lastHash := bucket.Get([]byte(LASTHASH))
 		if len(lastHash) == 0 {
@@ -52,16 +70,17 @@ func (chain *BlockChain) CreateChainWithGensis(data []byte) error {
 			bucket.Put([]byte(LASTHASH), genesis.Hash[:])
 			chain.LastBlock = genesis
 			chain.IteratorBlockHash = genesis.Hash
-		} else {
-			//从文件当中读取出最新的区块，并赋值给chain.LastBlock
-			lastHash := bucket.Get([]byte(LASTHASH))
-			lastBlockBytes := bucket.Get(lastHash)
-			chain.LastBlock, err = DeSerialize(lastBlockBytes)
-			chain.IteratorBlockHash = chain.LastBlock.Hash
-			if err != nil {
-				return err
-			}
-		}
+		} 
+		//else {
+			////从文件当中读取出最新的区块，并赋值给chain.LastBlock
+			//lastHash := bucket.Get([]byte(LASTHASH))
+			//lastBlockBytes := bucket.Get(lastHash)
+			//chain.LastBlock, err = DeSerialize(lastBlockBytes)
+			//chain.IteratorBlockHash = chain.LastBlock.Hash
+			//if err != nil {
+			//	return err
+			//}
+		//}
 
 		return nil
 	})

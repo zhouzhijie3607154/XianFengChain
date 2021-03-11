@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="83f81a4e-b8e3-4317-8d61-55513b2fbaf8" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/chain/iterator.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/client.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/command.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chain/blockchian.go" beforeDir="false" afterPath="$PROJECT_DIR$/chain/blockchian.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
@@ -38,7 +39,7 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../GoCommandLineArgs04/main1.go" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -51,6 +52,7 @@
     <configuration name="go build 2021/_03_公链/XianFengChain04" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="XianFengChain04" />
       <working_directory value="$PROJECT_DIR$" />
+      <parameters value="generategenesis -genesis hello" />
       <kind value="PACKAGE" />
       <filePath value="$PROJECT_DIR$/main.go" />
       <package value="2021/_03_公链/XianFengChain04" />
@@ -66,6 +68,10 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
+    <state x="447" y="46" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1615432191369">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state x="447" y="46" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1536.864@0.0.1536.864" timestamp="1615432191369" />
     <state x="702" y="299" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1614752177430">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
@@ -74,26 +80,26 @@
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state x="699" y="159" key="#go_build_2021/_03_公链/XianFengChain04/0.0.1536.864@0.0.1536.864" timestamp="1614752129950" />
-    <state x="752" y="248" key="FileChooserDialogImpl" timestamp="1614752126482">
+    <state x="752" y="248" key="FileChooserDialogImpl" timestamp="1615426426516">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state x="752" y="248" key="FileChooserDialogImpl/0.0.1536.864@0.0.1536.864" timestamp="1614752126482" />
-    <state width="858" height="189" key="GridCell.Tab.0.bottom" timestamp="1615360644221">
+    <state x="752" y="248" key="FileChooserDialogImpl/0.0.1536.864@0.0.1536.864" timestamp="1615426426516" />
+    <state width="858" height="189" key="GridCell.Tab.0.bottom" timestamp="1615432286659">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state width="858" height="189" key="GridCell.Tab.0.bottom/0.0.1536.864@0.0.1536.864" timestamp="1615360644221" />
-    <state width="858" height="189" key="GridCell.Tab.0.center" timestamp="1615360644221">
+    <state width="858" height="189" key="GridCell.Tab.0.bottom/0.0.1536.864@0.0.1536.864" timestamp="1615432286659" />
+    <state width="858" height="189" key="GridCell.Tab.0.center" timestamp="1615432286658">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state width="858" height="189" key="GridCell.Tab.0.center/0.0.1536.864@0.0.1536.864" timestamp="1615360644221" />
-    <state width="858" height="189" key="GridCell.Tab.0.left" timestamp="1615360644221">
+    <state width="858" height="189" key="GridCell.Tab.0.center/0.0.1536.864@0.0.1536.864" timestamp="1615432286658" />
+    <state width="858" height="189" key="GridCell.Tab.0.left" timestamp="1615432286658">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state width="858" height="189" key="GridCell.Tab.0.left/0.0.1536.864@0.0.1536.864" timestamp="1615360644221" />
-    <state width="858" height="189" key="GridCell.Tab.0.right" timestamp="1615360644221">
+    <state width="858" height="189" key="GridCell.Tab.0.left/0.0.1536.864@0.0.1536.864" timestamp="1615432286658" />
+    <state width="858" height="189" key="GridCell.Tab.0.right" timestamp="1615432286658">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state width="858" height="189" key="GridCell.Tab.0.right/0.0.1536.864@0.0.1536.864" timestamp="1615360644221" />
+    <state width="858" height="189" key="GridCell.Tab.0.right/0.0.1536.864@0.0.1536.864" timestamp="1615432286658" />
     <state x="333" y="73" key="SettingsEditor" timestamp="1615260813263">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
