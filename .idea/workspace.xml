@@ -48,7 +48,7 @@
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="settings.editor.selected.configurable" value="preferences.customizations" />
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Go Build.go build main.go">
     <configuration name="go build 2021/_03_公链/XianFengChain04" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="XianFengChain04" />
       <working_directory value="$PROJECT_DIR$" />
@@ -58,9 +58,34 @@
       <package value="2021/_03_公链/XianFengChain04" />
       <method v="2" />
     </configuration>
+    <configuration name="go build client.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="XianFengChain04" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <kind value="FILE" />
+      <filePath value="$PROJECT_DIR$/client/client.go" />
+      <package value="2021/_03_公链/XianFengChain04" />
+      <directory value="$PROJECT_DIR$/" />
+      <method v="2" />
+    </configuration>
+    <configuration name="go build main.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="XianFengChain04" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <kind value="FILE" />
+      <filePath value="$PROJECT_DIR$/main.go" />
+      <package value="2021/_03_公链/XianFengChain04" />
+      <directory value="$PROJECT_DIR$/" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Go Build.go build 2021/_03_公链/XianFengChain04" />
+      <item itemvalue="Go Build.go build client.go" />
+      <item itemvalue="Go Build.go build main.go" />
+    </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Build.go build main.go" />
         <item itemvalue="Go Build.go build 2021/_03_公链/XianFengChain04" />
+        <item itemvalue="Go Build.go build client.go" />
       </list>
     </recent_temporary>
   </component>
@@ -68,10 +93,10 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="447" y="46" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1615432191369">
+    <state x="447" y="46" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1615435488929">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state x="447" y="46" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1536.864@0.0.1536.864" timestamp="1615432191369" />
+    <state x="447" y="46" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1536.864@0.0.1536.864" timestamp="1615435488929" />
     <state x="702" y="299" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1614752177430">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
@@ -80,26 +105,30 @@
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state x="699" y="159" key="#go_build_2021/_03_公链/XianFengChain04/0.0.1536.864@0.0.1536.864" timestamp="1614752129950" />
+    <state x="484" y="93" key="#go_build_client.go" timestamp="1615435400318">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state x="484" y="93" key="#go_build_client.go/0.0.1536.864@0.0.1536.864" timestamp="1615435400318" />
     <state x="752" y="248" key="FileChooserDialogImpl" timestamp="1615426426516">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state x="752" y="248" key="FileChooserDialogImpl/0.0.1536.864@0.0.1536.864" timestamp="1615426426516" />
-    <state width="858" height="189" key="GridCell.Tab.0.bottom" timestamp="1615432286659">
+    <state width="1493" height="189" key="GridCell.Tab.0.bottom" timestamp="1615435493634">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state width="858" height="189" key="GridCell.Tab.0.bottom/0.0.1536.864@0.0.1536.864" timestamp="1615432286659" />
-    <state width="858" height="189" key="GridCell.Tab.0.center" timestamp="1615432286658">
+    <state width="1493" height="189" key="GridCell.Tab.0.bottom/0.0.1536.864@0.0.1536.864" timestamp="1615435493634" />
+    <state width="1493" height="189" key="GridCell.Tab.0.center" timestamp="1615435493634">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state width="858" height="189" key="GridCell.Tab.0.center/0.0.1536.864@0.0.1536.864" timestamp="1615432286658" />
-    <state width="858" height="189" key="GridCell.Tab.0.left" timestamp="1615432286658">
+    <state width="1493" height="189" key="GridCell.Tab.0.center/0.0.1536.864@0.0.1536.864" timestamp="1615435493634" />
+    <state width="1493" height="189" key="GridCell.Tab.0.left" timestamp="1615435493634">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state width="858" height="189" key="GridCell.Tab.0.left/0.0.1536.864@0.0.1536.864" timestamp="1615432286658" />
-    <state width="858" height="189" key="GridCell.Tab.0.right" timestamp="1615432286658">
+    <state width="1493" height="189" key="GridCell.Tab.0.left/0.0.1536.864@0.0.1536.864" timestamp="1615435493634" />
+    <state width="1493" height="189" key="GridCell.Tab.0.right" timestamp="1615435493634">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state width="858" height="189" key="GridCell.Tab.0.right/0.0.1536.864@0.0.1536.864" timestamp="1615432286658" />
+    <state width="1493" height="189" key="GridCell.Tab.0.right/0.0.1536.864@0.0.1536.864" timestamp="1615435493634" />
     <state x="333" y="73" key="SettingsEditor" timestamp="1615260813263">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
