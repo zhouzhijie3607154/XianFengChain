@@ -26,6 +26,10 @@ func (cmd *CmdClient) Run() {
 	}else {
 	switch os.Args[1] {//有参数，调用参数对应的方法
 	case GENERATEGENESIS:
+		if len(os.Args[2:])>2 {
+			fmt.Println("only  -genesis")
+			return
+		}
 		var genesis string
 		flagSet := flag.NewFlagSet(GENERATEGENESIS, flag.ExitOnError)
 		flagSet.StringVar(&genesis,"genesis","","用户输入的创世区块从存储数据")
@@ -44,9 +48,43 @@ func (cmd *CmdClient) Run() {
 		}
 
 	case CREATEBLOCK:
-		fmt.Println("调用创建新区块功能！")
+		if len(os.Args[2:])>2 {
+			fmt.Println("参数无法识别：",os.Args[2:])
+			return
+		}
+		var data string
+		flagSet := flag.NewFlagSet(CREATEBLOCK, flag.ExitOnError)
+		flagSet.StringVar(&data,"data","","用户输入的新区块数据")
+		flagSet.Parse(os.Args[2:])
+
+	//flag 为true时，说明 已经有创世区块了。
+		flag := new(big.Int).SetBytes(cmd.Chain.LastBlock.Hash[:]).Cmp(big.NewInt(0)) == 1
+		if !flag {
+			fmt.Println("Error: ,your client don't have a blockchain now !")
+			fmt.Println("Use generategenesis [-genesis 'data'] to create a new blockchain ")
+		}
+		err := cmd.Chain.CreateNewBlock([]byte(data))
+		if err != nil {
+			fmt.Println("main.go: ",err.Error())
+
+		}else {
+			fmt.Println("main.go:" ,"generate a new block OK and data is",data)
+		}
 	case GETLASTBLOCK:
+		if len(os.Args[1:])>1 {
+			fmt.Println("参数无法识别：",os.Args[1:])
+			return
+		}
+		IsChain := new(big.Int).SetBytes(cmd.Chain.LastBlock.Hash[:]).Cmp(big.NewInt(0)) == 1
+		if !IsChain {
+			fmt.Println("Error: ,your client don't have a blockchain now !")
+			fmt.Println("Use generategenesis [-genesis 'data'] to create a new blockchain ")
+			return
+		}
 		fmt.Println("调用获取最新区块功能！")
+		flag.String(GETLASTBLOCK,"","用于获取最新区块的数据")
+		fmt.Printf("%+v\n",cmd.Chain.LastBlock)
+
 	case GETALLBLOCKS:
 		fmt.Println("调所有区块的功能！")
 	case HELP:

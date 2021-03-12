@@ -2,6 +2,7 @@ package chain
 
 import (
 	"2021/_03_公链/XianFengChain04/consensus"
+	"2021/_03_公链/XianFengChain04/transaction"
 	"bytes"
 	"encoding/gob"
 	"time"
@@ -19,8 +20,10 @@ type Block struct {
 	TimeStamp int64 //时间戳
 	//Difficulty int64
 	Nonce int64 //随机数
-	Data  []byte
+	//Data  []byte//区块体 分解
+	Transactions []transaction.Transaction
 }
+
 
 ///**
 //*计算区块哈希的功能函数
