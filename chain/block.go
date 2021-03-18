@@ -40,13 +40,13 @@ type Block struct {
 /**
 *创建创世区块
  */
-func CreateGenesis(data []byte) Block {
+func CreateGenesis(txs []transaction.Transaction) Block {
 	gensis := Block{
 		Height:    0,
 		Version:   0x00,
 		PrevHash:  [32]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 		TimeStamp: time.Now().Unix(),
-		Data:      data,
+		Transactions: txs,
 	}
 	//调用PoW共识算法，寻找随机数，计算哈希值
 	proof := consensus.NewPow(gensis)
@@ -58,14 +58,13 @@ func CreateGenesis(data []byte) Block {
 /**
 *生成新区块的功能函数
  */
-func NewBlock(height int64, prev [32]byte, data []byte) Block {
-
+func NewBlock(height int64, prev [32]byte, txs []transaction.Transaction) Block {
 	block := Block{
 		Height:    height + 1,
 		Version:   0x00,
 		PrevHash:  prev,
 		TimeStamp: time.Now().Unix(),
-		Data:      data,
+		Transactions:txs,
 	}
 	//调用PoW共识算法，寻找随机数，计算哈希值
 	proof := consensus.NewPow(block)
@@ -86,8 +85,8 @@ func (block Block) GetTimeStamp() int64 {
 func (block Block) GetPreHash() [32]byte {
 	return block.PrevHash
 }
-func (block Block) GetData() []byte {
-	return block.Data
+func (block Block) GetTransactions() []transaction.Transaction{
+	return block.Transactions
 }
 /**
 区块的序列化方法 gob

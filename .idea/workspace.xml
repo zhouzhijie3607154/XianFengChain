@@ -2,11 +2,18 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="83f81a4e-b8e3-4317-8d61-55513b2fbaf8" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/transaction/transaction.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/transaction/txinput.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/transaction/txoutput.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chain/block.go" beforeDir="false" afterPath="$PROJECT_DIR$/chain/block.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chain/blockchian.go" beforeDir="false" afterPath="$PROJECT_DIR$/chain/blockchian.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/client.go" beforeDir="false" afterPath="$PROJECT_DIR$/client/client.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/command.go" beforeDir="false" afterPath="$PROJECT_DIR$/client/command.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/consensus/PoW.go" beforeDir="false" afterPath="$PROJECT_DIR$/consensus/PoW.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/consensus/consensus.go" beforeDir="false" afterPath="$PROJECT_DIR$/consensus/consensus.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transaction/transaction.go" beforeDir="false" afterPath="$PROJECT_DIR$/transaction/transaction.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transaction/txoutput.go" beforeDir="false" afterPath="$PROJECT_DIR$/transaction/txoutput.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/convert.go" beforeDir="false" afterPath="$PROJECT_DIR$/utils/convert.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/xianfengchain04.db" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/公链开发文档" beforeDir="false" afterPath="$PROJECT_DIR$/公链开发文档" afterDir="false" />
     </list>
@@ -36,6 +43,7 @@
   <component name="PropertiesComponent">
     <property name="DefaultGoTemplateProperty" value="Go File" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
@@ -46,14 +54,14 @@
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="settings.editor.selected.configurable" value="preferences.customizations" />
+    <property name="settings.editor.selected.configurable" value="File.Encoding" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="E:\Code\Golang\GoProjects\src\2021\_03_公链\XianFengChain04\transaction" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Build.go build main.go">
+  <component name="RunManager" selected="Go Build.go build 2021/_03_公链/XianFengChain04">
     <configuration name="go build 2021/_03_公链/XianFengChain04" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="XianFengChain04" />
       <working_directory value="$PROJECT_DIR$" />
@@ -88,8 +96,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Go Build.go build main.go" />
         <item itemvalue="Go Build.go build 2021/_03_公链/XianFengChain04" />
+        <item itemvalue="Go Build.go build main.go" />
         <item itemvalue="Go Build.go build client.go" />
       </list>
     </recent_temporary>
@@ -110,6 +118,10 @@
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state x="699" y="159" key="#go_build_2021/_03_公链/XianFengChain04/0.0.1536.864@0.0.1536.864" timestamp="1614752129950" />
+    <state x="806" y="49" key="#go_build_block.go" timestamp="1615517912481">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state x="806" y="49" key="#go_build_block.go/0.0.1536.864@0.0.1536.864" timestamp="1615517912481" />
     <state x="484" y="93" key="#go_build_client.go" timestamp="1615435400318">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
@@ -118,33 +130,33 @@
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state x="752" y="248" key="FileChooserDialogImpl/0.0.1536.864@0.0.1536.864" timestamp="1615514410254" />
-    <state width="1493" height="189" key="GridCell.Tab.0.bottom" timestamp="1615452812421">
+    <state width="858" height="159" key="GridCell.Tab.0.bottom" timestamp="1615592032552">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state width="1493" height="189" key="GridCell.Tab.0.bottom/0.0.1536.864@0.0.1536.864" timestamp="1615452812421" />
-    <state width="1493" height="189" key="GridCell.Tab.0.center" timestamp="1615452812420">
+    <state width="858" height="159" key="GridCell.Tab.0.bottom/0.0.1536.864@0.0.1536.864" timestamp="1615592032552" />
+    <state width="858" height="159" key="GridCell.Tab.0.center" timestamp="1615592032552">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state width="1493" height="189" key="GridCell.Tab.0.center/0.0.1536.864@0.0.1536.864" timestamp="1615452812420" />
-    <state width="1493" height="189" key="GridCell.Tab.0.left" timestamp="1615452812420">
+    <state width="858" height="159" key="GridCell.Tab.0.center/0.0.1536.864@0.0.1536.864" timestamp="1615592032552" />
+    <state width="858" height="159" key="GridCell.Tab.0.left" timestamp="1615592032552">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state width="1493" height="189" key="GridCell.Tab.0.left/0.0.1536.864@0.0.1536.864" timestamp="1615452812420" />
-    <state width="1493" height="189" key="GridCell.Tab.0.right" timestamp="1615452812420">
+    <state width="858" height="159" key="GridCell.Tab.0.left/0.0.1536.864@0.0.1536.864" timestamp="1615592032552" />
+    <state width="858" height="159" key="GridCell.Tab.0.right" timestamp="1615592032552">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state width="1493" height="189" key="GridCell.Tab.0.right/0.0.1536.864@0.0.1536.864" timestamp="1615452812420" />
-    <state x="333" y="73" key="SettingsEditor" timestamp="1615260813263">
+    <state width="858" height="159" key="GridCell.Tab.0.right/0.0.1536.864@0.0.1536.864" timestamp="1615592032552" />
+    <state x="333" y="73" key="SettingsEditor" timestamp="1615961400254">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state x="333" y="73" key="SettingsEditor/0.0.1536.864@0.0.1536.864" timestamp="1615260813263" />
+    <state x="333" y="73" key="SettingsEditor/0.0.1536.864@0.0.1536.864" timestamp="1615961400254" />
     <state x="724" y="194" width="755" height="548" key="find.popup" timestamp="1614821283742">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state x="724" y="194" width="755" height="548" key="find.popup/0.0.1536.864@0.0.1536.864" timestamp="1614821283742" />
-    <state x="930" y="185" width="672" height="678" key="search.everywhere.popup" timestamp="1615510091087">
+    <state x="930" y="185" width="672" height="678" key="search.everywhere.popup" timestamp="1615860257315">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state x="930" y="185" width="672" height="678" key="search.everywhere.popup/0.0.1536.864@0.0.1536.864" timestamp="1615510091087" />
+    <state x="930" y="185" width="672" height="678" key="search.everywhere.popup/0.0.1536.864@0.0.1536.864" timestamp="1615860257315" />
   </component>
 </project>
