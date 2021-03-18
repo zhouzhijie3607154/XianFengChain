@@ -43,6 +43,24 @@ func CreateChain(db *bolt.DB) BlockChain {
 	}
 }
 
+/**
+*创建coinBase交易的办法
+ */
+func (chain *BlockChain) CreateCoinBase(addr string) (error){
+	//1、创建一笔coinbase交易
+	coinbase, err := transaction.CraeteCoinbase(addr)
+	if err != nil {
+		return err
+	}
+	//2、将coinbase交易存到区块中
+	err = chain.CreateChainWithGenesis([]transaction.Transaction{*coinbase})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+
 //创建一个区块链对象，初始化一个创世区块
 func (chain *BlockChain) CreateChainWithGenesis(txs []transaction.Transaction) error {
 	flag := new(big.Int).SetBytes(chain.IteratorBlockHash[:]).Cmp(big.NewInt(0)) == 1
@@ -232,8 +250,8 @@ func (chain *BlockChain) Next() (block Block) {
 */
 func (chain *BlockChain) SearchUTXO(addr string) []transaction.UTXO {
 	//准备两个容器
-	spend := make([]transaction.TxInput, 0)  //花费记录的容器
-	inCome := make([]transaction.UTXO, 0) //收入记录的容器
+	spend := make([]transaction.TxInput, 0) //花费记录的容器
+	inCome := make([]transaction.UTXO, 0)   //收入记录的容器
 
 	//遍历拿到每一个区块
 	for chain.HasNext() {
@@ -255,11 +273,11 @@ func (chain *BlockChain) SearchUTXO(addr string) []transaction.UTXO {
 				}
 				//与当前地址相等则创建一个记录（input）记录该交易ID 下标
 				utxo := transaction.UTXO{
-					TxId: tx.TxHash,
-					Vout: index,
+					TxId:     tx.TxHash,
+					Vout:     index,
 					TxOutPut: output,
 				}
-				inCome = append(inCome,utxo )
+				inCome = append(inCome, utxo)
 
 			}
 		}
@@ -285,24 +303,49 @@ func (chain *BlockChain) SearchUTXO(addr string) []transaction.UTXO {
 //定义区块链的发送交易的功能
 func (chain *BlockChain) SendTransaction(from, to string, amount float64) error {
 	//1、先把from中的可花费的钱（utxo）找出来
-	utxos := chain.SearchUTXO(from)
-	var totalBalance float64
-	for _,utxo := range utxos{
-		totalBalance += utxo.Value
-	}
-	if totalBalance  < amount{
+	utxos, totalBalance := chain.GetUTXOWithBalance(from)
+	if totalBalance < amount {
 		return errors.New("余额不足，交易失败！！！")
 	}
-	//2、可花费的钱总额大于要花费的amount，才构建交易
+	//2、分析出我们最多需要用的UTXO张数
+	totalBalance = 0
+	var utxoNum int
+	for index, utxo := range utxos {
+		totalBalance += utxo.Value
+		if totalBalance >= amount {
+			utxoNum = index
+			break
+		}
+	}
 
-	newTx, err := transaction.CreateNewTransaction(from, to, amount)
+	//3、创建
+	newTx, err := transaction.CreateNewTransaction(from, to, amount, utxos[:utxoNum+1])
 	if err != nil {
+		fmt.Println(err.Error())
 		return err
 	}
+
 	err = chain.CreateNewBlock([]transaction.Transaction{*newTx})
 	if err != nil {
 		return err
 	}
 	return nil
 
+}
+
+//查询地址余额功能 @param addr:查询的地址 @return float64 余额
+func (chain *BlockChain) GetBalance(addr string) float64 {
+	_, totalBalance := chain.GetUTXOWithBalance(addr)
+	return totalBalance
+}
+
+//查询地址余额功能 @param addr:查询的地址 @return float64 余额  utxo 可用的UTXO集合
+
+func (chain *BlockChain) GetUTXOWithBalance(addr string) ([]transaction.UTXO, float64) {
+	utxos := chain.SearchUTXO(addr)
+	var totalBalance float64
+	for _, utxo := range utxos {
+		totalBalance += utxo.Value
+	}
+	return utxos, totalBalance
 }

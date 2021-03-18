@@ -8,7 +8,7 @@ import (
 	"math/big"
 )
 
-const DIFFICULTY = 20
+const DIFFICULTY = 10
 
 type PoW struct {
 	Block  BlockInterface
