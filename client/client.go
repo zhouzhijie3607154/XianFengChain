@@ -10,6 +10,7 @@ package client
 
 import (
 	"2021/_03_公链/XianFengChain04/chain"
+	"2021/_03_公链/XianFengChain04/utils"
 	"flag"
 	"fmt"
 	"math/big"
@@ -34,19 +35,19 @@ func (cmd *CmdClient) Run() {
 			cmd.GetBalance()
 		case GETLASTBLOCK:
 			cmd.GetLastBlock()
-		case GETALLBLOCKS://查询所有区块
+		case GETALLBLOCKS: //查询所有区块
 			blocks, err := cmd.Chain.GetAllBlocks()
 			if err != nil {
 				fmt.Println(err.Error())
 				return
 			}
-			for _,block := range blocks {
-				for _,tx := range block.Transactions {
-					for index,input :=range tx.Inputs{
-						fmt.Printf("第%d 个区块中的 第 %v 笔交易输入姓名：%s\n",block.Height+1,index+1,input.ScriptSig)
+			for _, block := range blocks {
+				for _, tx := range block.Transactions {
+					for index, input := range tx.Inputs {
+						fmt.Printf("第%d 个区块中的 第 %v 笔交易输入姓名：%s\n", block.Height+1, index+1, input.ScriptSig)
 					}
-					for index,output :=range tx.OutPuts{
-						fmt.Printf("第%d 个区块中的 第 %v 笔交易输出金额：%+v , 交易输出对象为：%s\n",block.Height+1,index+1,output.Value,output.ScriptPub)
+					for index, output := range tx.OutPuts {
+						fmt.Printf("第%d 个区块中的 第 %v 笔交易输出金额：%+v , 交易输出对象为：%s\n", block.Height+1, index+1, output.Value, output.ScriptPub)
 					}
 
 				}
@@ -61,7 +62,7 @@ func (cmd *CmdClient) Run() {
 		}
 	}
 }
-func (cmd *CmdClient)GetLastBlock()  {
+func (cmd *CmdClient) GetLastBlock() {
 	if len(os.Args[1:]) > 1 {
 		fmt.Println("参数无法识别：", os.Args[1:])
 		return
@@ -77,6 +78,7 @@ func (cmd *CmdClient)GetLastBlock()  {
 	fmt.Printf("%+v\n", cmd.Chain.LastBlock)
 
 }
+
 //发送交易功能
 func (cmd *CmdClient) SendTransaction() {
 	if len(os.Args[2:]) > 6 {
@@ -85,13 +87,32 @@ func (cmd *CmdClient) SendTransaction() {
 	}
 	var from string
 	var to string
-	var amount float64
+	var amount string
 	flagSet := flag.NewFlagSet(SENDTRANSACTION, flag.ExitOnError)
 	flagSet.StringVar(&from, "from", "", "发起者地址")
 	flagSet.StringVar(&to, "to", "", "接受者地址")
-	flagSet.Float64Var(&amount, "amount", 0, "转账的金额")
+	flagSet.StringVar(&amount, "amount", "", "转账的金额")
 	flagSet.Parse(os.Args[2:])
-
+	///解析多个参数数组
+	fromSlice, err := utils.JSONArrayToString(from)
+	if err != nil {
+		fmt.Println("抱歉，参数格式不正确，请检查后重试！")
+		return
+	}
+	toSlice, err := utils.JSONArrayToString(to)
+	if err != nil {
+		fmt.Println("抱歉，参数格式不正确，请检查后重试！")
+		return
+	}
+	amountSlice, err := utils.JSONArrayToFloat(amount)
+	if err != nil {
+		fmt.Println("抱歉，参数格式不正确，请检查后重试！")
+		return
+	}
+	//判断各参数列表长度是否一致
+	if len(fromSlice) != len(toSlice) || len(toSlice) != len(amountSlice) {
+		fmt.Println("各参数长度不一致")
+	}
 	//flag 为true时，说明 已经有创世区块了。
 	flag := new(big.Int).SetBytes(cmd.Chain.LastBlock.Hash[:]).Cmp(big.NewInt(0)) == 1
 	if !flag {
@@ -99,7 +120,7 @@ func (cmd *CmdClient) SendTransaction() {
 		fmt.Println("Use generategenesis [-genesis 'data'] to create a new blockchain ")
 	}
 
-	err := cmd.Chain.SendTransaction(from, to, amount)
+	err = cmd.Chain.SendTransaction(fromSlice,toSlice ,amountSlice )
 	if err != nil {
 		fmt.Println("抱歉，发送交易时出错", err.Error())
 		return

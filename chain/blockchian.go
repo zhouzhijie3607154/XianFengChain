@@ -301,35 +301,40 @@ func (chain *BlockChain) SearchUTXO(addr string) []transaction.UTXO {
 }
 
 //定义区块链的发送交易的功能
-func (chain *BlockChain) SendTransaction(from, to string, amount float64) error {
-	//1、先把from中的可花费的钱（utxo）找出来
-	utxos, totalBalance := chain.GetUTXOWithBalance(from)
-	if totalBalance < amount {
-		return errors.New("余额不足，交易失败！！！")
-	}
-	//2、分析出我们最多需要用的UTXO张数
-	totalBalance = 0
-	var utxoNum int
-	for index, utxo := range utxos {
-		totalBalance += utxo.Value
-		if totalBalance >= amount {
-			utxoNum = index
-			break
+func (chain *BlockChain) SendTransaction(froms, tos []string, amounts []float64) error {
+
+	//遍历
+	for from_index,from := range froms {
+		//1、先把from中的可花费的钱（utxo）找出来
+		utxos, totalBalance := chain.GetUTXOWithBalance(from)
+		if totalBalance < amounts[from_index] {
+			return errors.New("余额不足，交易失败！！！")
 		}
-	}
+		//2、分析出我们最多需要用的UTXO张数
+		totalBalance = 0
+		var utxoNum int
+		for index, utxo := range utxos {
+			totalBalance += utxo.Value
+			if totalBalance >= amounts[from_index] {
+				utxoNum = index
+				break
+			}
+		}
 
-	//3、创建
-	newTx, err := transaction.CreateNewTransaction(from, to, amount, utxos[:utxoNum+1])
-	if err != nil {
-		fmt.Println(err.Error())
-		return err
-	}
+		//3、创建
+		newTx, err := transaction.CreateNewTransaction(from, tos[from_index], amounts[from_index], utxos[:utxoNum+1])
+		if err != nil {
+			fmt.Println(err.Error())
+			return err
+		}
 
-	err = chain.CreateNewBlock([]transaction.Transaction{*newTx})
-	if err != nil {
-		return err
+		err = chain.CreateNewBlock([]transaction.Transaction{*newTx})
+		if err != nil {
+			return err
+		}
+		return nil
+
 	}
-	return nil
 
 }
 

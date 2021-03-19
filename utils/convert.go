@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/gob"
+	"encoding/json"
 )
 
 /**
@@ -32,5 +33,19 @@ func GobDecode(data []byte,v *interface{})(interface{},error)  {
 
 	err := gob.NewDecoder(bytes.NewReader(data)).Decode(v)
 	return v, err
+}
 
+//json序列化 json格式的字符串转  字符串切片
+func JSONArrayToString(array string)([]string,error)  {
+
+	var stringSlice []string
+	err := json.Unmarshal([]byte(array),&stringSlice)
+	return stringSlice ,err
+}
+//json序列化 json格式的字符串   转换为对应浮点型切片
+func JSONArrayToFloat(array string) ([]float64,error) {
+
+	var floatSlice []float64
+	err := json.Unmarshal([]byte(array),&floatSlice)
+	return floatSlice ,err
 }

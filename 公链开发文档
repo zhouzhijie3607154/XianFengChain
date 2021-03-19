@@ -186,7 +186,10 @@ UTXO：所有TxOutput的一个子集
 2021年3月18日11:15:11
 比特币系统中：一个区块中可以存放多笔交易 ：[]Transaction
 真正实现的 ：一个交易就占一个区块
-
+go run main.go sendtransaciton
+    -from   "[ \"yugu\",\"sansui\" ]"
+    -to     "[ \"shipeng\",\"liuchao\" ]"
+    -amount [10,20]
 
 
 

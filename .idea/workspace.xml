@@ -5,10 +5,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chain/blockchian.go" beforeDir="false" afterPath="$PROJECT_DIR$/chain/blockchian.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/client.go" beforeDir="false" afterPath="$PROJECT_DIR$/client/client.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/command.go" beforeDir="false" afterPath="$PROJECT_DIR$/client/command.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/transaction/transaction.go" beforeDir="false" afterPath="$PROJECT_DIR$/transaction/transaction.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianfengchain04.db" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/convert.go" beforeDir="false" afterPath="$PROJECT_DIR$/utils/convert.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/公链开发文档" beforeDir="false" afterPath="$PROJECT_DIR$/公链开发文档" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -120,10 +117,10 @@
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state x="484" y="93" key="#go_build_client.go/0.0.1536.864@0.0.1536.864" timestamp="1615435400318" />
-    <state x="752" y="248" key="FileChooserDialogImpl" timestamp="1615514410254">
+    <state x="752" y="248" key="FileChooserDialogImpl" timestamp="1616076455740">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state x="752" y="248" key="FileChooserDialogImpl/0.0.1536.864@0.0.1536.864" timestamp="1615514410254" />
+    <state x="752" y="248" key="FileChooserDialogImpl/0.0.1536.864@0.0.1536.864" timestamp="1616076455740" />
     <state width="1019" height="159" key="GridCell.Tab.0.bottom" timestamp="1616032753591">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
