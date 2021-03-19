@@ -8,6 +8,7 @@ package transaction
 import (
 	"2021/_03_公链/XianFengChain04/utils"
 	"crypto/sha256"
+	"errors"
 )
 
 //奖励 reward
@@ -53,6 +54,9 @@ func CraeteCoinbase(address string) (*Transaction, error) {
 @param utxos 交易发起者的未花费输出的集合
 */
 func CreateNewTransaction(from, to string, amount float64, utxos []UTXO) (*Transaction, error) {
+	if amount <= 0 {
+		return nil,errors.New("amount value cann't <= zero !")
+	}
 	/*
 		1.构建inputs
 		2、构建outputs
@@ -63,7 +67,7 @@ func CreateNewTransaction(from, to string, amount float64, utxos []UTXO) (*Trans
 	outputs := make([]TxOutPut, 0)
 
 	//定义一个变量，记录form一共付了多少钱,判断是否需要找零
-	var inputAmmout float64
+	var inputAmount float64
 	//给inputs赋值
 	for _, utxo := range utxos {
 		input := TxInput{
@@ -72,7 +76,7 @@ func CreateNewTransaction(from, to string, amount float64, utxos []UTXO) (*Trans
 			ScriptSig: []byte(from),
 		}
 		inputs = append(inputs, input)
-		inputAmmout += utxo.Value
+		inputAmount += utxo.Value
 
 	}
 	//outputs赋值
@@ -82,9 +86,9 @@ func CreateNewTransaction(from, to string, amount float64, utxos []UTXO) (*Trans
 	}
 	outputs = append(outputs, outPut0)
 	//判断是否需要找零？
-	if (inputAmmout - amount) > 0 {
+	if (inputAmount - amount) > 0 {
 		outPut1 := TxOutPut{
-			Value:     inputAmmout - amount,
+			Value:     inputAmount - amount,
 			ScriptPub: []byte(from),
 		}
 		outputs = append(outputs, outPut1)

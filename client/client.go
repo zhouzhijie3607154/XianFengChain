@@ -96,6 +96,7 @@ func (cmd *CmdClient) SendTransaction() {
 	///解析多个参数数组
 	fromSlice, err := utils.JSONArrayToString(from)
 	if err != nil {
+		fmt.Println(from)
 		fmt.Println("抱歉，参数格式不正确，请检查后重试！")
 		return
 	}
@@ -182,3 +183,8 @@ func (cmd *CmdClient) GetBalance() {
 	balance := cmd.Chain.GetBalance(addr)
 	fmt.Printf("地址 [%s] 的余额是：%f\n", addr, balance)
 }
+/*
+go run main.go sendtransaction -from [\"yugu\",\"xiaobing\"] -to [\"xiaobing\",\"shipeng\"] -amount [10,10]
+go run main.go sendtransaction -from "[\"yugu\",\"xiaobing\"]" -to "[\"xiaobing\",\"shipeng\"]" -amount "[10,10]"
+
+ */

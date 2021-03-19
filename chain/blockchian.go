@@ -46,7 +46,7 @@ func CreateChain(db *bolt.DB) BlockChain {
 /**
 *创建coinBase交易的办法
  */
-func (chain *BlockChain) CreateCoinBase(addr string) (error){
+func (chain *BlockChain) CreateCoinBase(addr string) error {
 	//1、创建一笔coinbase交易
 	coinbase, err := transaction.CraeteCoinbase(addr)
 	if err != nil {
@@ -59,7 +59,6 @@ func (chain *BlockChain) CreateCoinBase(addr string) (error){
 	}
 	return nil
 }
-
 
 //创建一个区块链对象，初始化一个创世区块
 func (chain *BlockChain) CreateChainWithGenesis(txs []transaction.Transaction) error {
@@ -302,11 +301,12 @@ func (chain *BlockChain) SearchUTXO(addr string) []transaction.UTXO {
 
 //定义区块链的发送交易的功能
 func (chain *BlockChain) SendTransaction(froms, tos []string, amounts []float64) error {
-
+	//新建容器
+	newTxs := make([]transaction.Transaction, 0)
 	//遍历
-	for from_index,from := range froms {
+	for from_index, _ := range froms {
 		//1、先把from中的可花费的钱（utxo）找出来
-		utxos, totalBalance := chain.GetUTXOWithBalance(from)
+		utxos, totalBalance := chain.GetUTXOWithBalance(froms[from_index])
 		if totalBalance < amounts[from_index] {
 			return errors.New("余额不足，交易失败！！！")
 		}
@@ -322,19 +322,21 @@ func (chain *BlockChain) SendTransaction(froms, tos []string, amounts []float64)
 		}
 
 		//3、创建
-		newTx, err := transaction.CreateNewTransaction(from, tos[from_index], amounts[from_index], utxos[:utxoNum+1])
+		newTx, err := transaction.CreateNewTransaction(froms[from_index], tos[from_index], amounts[from_index], utxos[:utxoNum+1])
 		if err != nil {
 			fmt.Println(err.Error())
 			return err
 		}
-
-		err = chain.CreateNewBlock([]transaction.Transaction{*newTx})
-		if err != nil {
-			return err
-		}
-		return nil
+		newTxs = append(newTxs, *newTx)
 
 	}
+
+	err := chain.CreateNewBlock(newTxs)
+	if err != nil {
+		return err
+	}
+
+	return nil
 
 }
 
@@ -347,6 +349,7 @@ func (chain *BlockChain) GetBalance(addr string) float64 {
 //查询地址余额功能 @param addr:查询的地址 @return float64 余额  utxo 可用的UTXO集合
 
 func (chain *BlockChain) GetUTXOWithBalance(addr string) ([]transaction.UTXO, float64) {
+	chain.IteratorBlockHash = chain.LastBlock.Hash
 	utxos := chain.SearchUTXO(addr)
 	var totalBalance float64
 	for _, utxo := range utxos {
