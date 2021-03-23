@@ -191,7 +191,11 @@ go run main.go sendtransaciton
     -to     "[ \"shipeng\",\"liuchao\" ]"
     -amount [10,20]
 
-
+2021年3月23日09:22:42
+特殊的多对多转账：
+①一对多转账
+    yugu  -->sansui
+②多对一转账
 
 
 

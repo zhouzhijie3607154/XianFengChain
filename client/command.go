@@ -1,10 +1,10 @@
 package client
-const(
-	GENERATEGENESIS = "generategenesis"
-	SENDTRANSACTION = "sendtransaction"
-	GETBALANCE = "getbalance"
-	GETLASTBLOCK = "getlastblock"
-	GETALLBLOCKS = "getallblocks"
-	HELP = "help"
-	VERSION = "version"
+
+const (
+	GENERATEGENSIS  = "generategensis"  //ccoinbase -addr
+	SENDTRANSACTION = "sendtransaction" //sendTransaction from to amount
+	GETBALANCE      = "getbalance"      //获取地址的余额功能
+	GETLASTBLOCK    = "getlastblock"
+	GETALLBLOCKS    = "getallblocks"
+	HELP            = "help"
 )

@@ -1,115 +1,95 @@
-/**
-2021年3月12日10:35:59
-author：admin
-filename ：transaction.go
-*/
 package transaction
 
 import (
 	"2021/_03_公链/XianFengChain04/utils"
 	"crypto/sha256"
-	"errors"
 )
 
-//奖励 reward
+const REWARDSIZE = 50
+
 /**
-*该结构体定义交易 分交易输入和交易输出
-*
+ * 定义交易的结构体
  */
-const REWARD = 50
-
 type Transaction struct {
-	TxHash  [32]byte   //交易的整体数据hash 用作唯一标识
-	Inputs  []TxInput  //交易输入
-	OutPuts []TxOutPut //交易输出
-
+	//交易哈希
+	TxHash [32]byte
+	//交易输入
+	Inputs []TxInput
+	//交易输出
+	Outputs []TxOutput
 }
 
-/*
-创建coinbase交易
-*/
-func CraeteCoinbase(address string) (*Transaction, error) {
-	output0 := TxOutPut{
-		Value:     REWARD,
-		ScriptPub: []byte(address),
+/**
+ * 该函数用于定义一个coinbase交易，并返回该交易结构体
+ */
+func CreateCoinBase(addr string) (*Transaction, error) {
+	output0 := TxOutput{
+		Value:     REWARDSIZE,
+		ScriptPub: []byte(addr),
 	}
+
 	coinbase := Transaction{
-		TxHash:  [32]byte{},
-		Inputs:  nil,
-		OutPuts: []TxOutPut{output0},
+		Outputs: []TxOutput{output0},
 	}
-	bytes, err := utils.GobEncode(coinbase)
+	coinbaseBytes, err := utils.Encode(coinbase)
 	if err != nil {
 		return nil, err
 	}
-	coinbase.TxHash = sha256.Sum256(bytes)
+	coinbase.TxHash = sha256.Sum256(coinbaseBytes)
+
 	return &coinbase, nil
 }
 
-/*
-该函数用于构建一笔普通的交易，返回构件好的交易实例
-@param from 交易发起者地址
-@param to 交易收款人地址
-@param amount 交易的金额
-@param utxos 交易发起者的未花费输出的集合
-*/
-func CreateNewTransaction(from, to string, amount float64, utxos []UTXO) (*Transaction, error) {
-	if amount <= 0 {
-		return nil,errors.New("amount value cann't <= zero !")
-	}
-	/*
-		1.构建inputs
-		2、构建outputs
-		3、构建transaction
-		4、计算trans哈希，赋值给Txhash
-	*/
-	inputs := make([]TxInput, 0)
-	outputs := make([]TxOutPut, 0)
-
-	//定义一个变量，记录form一共付了多少钱,判断是否需要找零
-	var inputAmount float64
-	//给inputs赋值
+/**
+ * 该函数用于构建一笔普通的交易，返回构建好的交易实例
+ */
+func CreateNewTransaction(utxos []UTXO, from string, to string, amount float64) (*Transaction, error) {
+	//1、构建inputs
+	inputs := make([]TxInput, 0) //用于存放交易输入的容器
+	var inputAmount float64      //该变量用于记录转账发起者一共付了多少钱
+	//input -> 交易输入:对某个交易的交易输出UTXO的引用
 	for _, utxo := range utxos {
 		input := TxInput{
 			TxId:      utxo.TxId,
 			Vout:      utxo.Vout,
 			ScriptSig: []byte(from),
 		}
-		inputs = append(inputs, input)
 		inputAmount += utxo.Value
-
+		//把构建好的input存入到交易输入容器中
+		inputs = append(inputs, input)
 	}
-	//outputs赋值
-	outPut0 := TxOutPut{
+
+	//2、构建outputs
+	outputs := make([]TxOutput, 0) //用于存放交易输出的容器
+	//构建转账接收者的交易输出
+	output0 := TxOutput{
 		Value:     amount,
 		ScriptPub: []byte(to),
 	}
-	outputs = append(outputs, outPut0)
-	//判断是否需要找零？
-	if (inputAmount - amount) > 0 {
-		outPut1 := TxOutPut{
+	outputs = append(outputs, output0) //把第一个交易输出放入到专门存交易输出的容器中
+
+	//判断是否需要找零,如果需要找零，则需要构建一个新的找零输出
+	if inputAmount-amount > 0 {
+		output1 := TxOutput{
 			Value:     inputAmount - amount,
 			ScriptPub: []byte(from),
 		}
-		outputs = append(outputs, outPut1)
+		outputs = append(outputs, output1)
 	}
-	//交易输入本质上就是一个交易输出的引用？
-	/*
-	   如何找到那笔交易、引用那一笔交易输出、引用哪一笔交易输出的索引？
-	   	遍历区块，遍历交易，遍历交易输出，筛选交易输出-->得到有关from的交易输出的集合
-	   如何找到没有花费出去的交易输出？
-	   	遍历区块，遍历交易，遍历交易输入，筛选交易输入-->得到有关 from的交易输入的集合
-	   		form的UTXO = 输出的集合 - 输入的集合
-	*/
 
+	//3、构建transaction
 	newTransaction := Transaction{
 		Inputs:  inputs,
-		OutPuts: outputs,
+		Outputs: outputs,
 	}
-	txbytes, err := utils.GobEncode(newTransaction)
+
+	//4、计算transaction的哈希,并赋值
+	transactionBytes, err := utils.Encode(newTransaction)
+	newTransaction.TxHash = sha256.Sum256(transactionBytes)
 	if err != nil {
 		return nil, err
 	}
-	newTransaction.TxHash = sha256.Sum256(txbytes)
+
+	//5、将构建的transaction实例进行返回
 	return &newTransaction, nil
 }

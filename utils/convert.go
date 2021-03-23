@@ -1,51 +1,54 @@
 package utils
 
 import (
-	"bytes"
-	"crypto/sha256"
 	"encoding/binary"
+	"bytes"
 	"encoding/gob"
 	"encoding/json"
 )
 
 /**
-*将int64类型的数据转换为[]byte类型
+ * 将int类型的数据转换为[]byte类型
  */
-func Int2Byte(num int64)([]byte,error) {
+func Int2Byte(num int64) ([]byte, error) {
 	buff := new(bytes.Buffer)
 	err := binary.Write(buff, binary.BigEndian, num)
-	return buff.Bytes(),err
-}
-func SHA256HashBlock(data []byte)[]byte  {
-	hash := sha256.New()
-	hash.Write(data)
-	return hash.Sum(nil)
-}
-
-//gob 序列化编码
-func GobEncode(v interface{})([]byte,error)  {
-	buff := new(bytes.Buffer)
-	err := gob.NewEncoder(buff).Encode(v)
 	return buff.Bytes(), err
 }
 
-func GobDecode(data []byte,v *interface{})(interface{},error)  {
+/**
+ * gob编码序列化
+ */
+func Encode(v interface{}) ([]byte, error) {
+	buf := new(bytes.Buffer)
+	encoder := gob.NewEncoder(buf)
+	err := encoder.Encode(v)
+	return buf.Bytes(), err
+}
 
-	err := gob.NewDecoder(bytes.NewReader(data)).Decode(v)
+/**
+ * gob反编码
+ */
+func Decode(data []byte, v interface{}) (interface{}, error) {
+	decoder := gob.NewDecoder(bytes.NewReader(data))
+	err := decoder.Decode(v)
 	return v, err
 }
 
-//json序列化 json格式的字符串转  字符串切片
-func JSONArrayToString(array string)([]string,error)  {
-
+/**
+ * 将json格式的数组转换为对应的字符串类型的切片
+ */
+func JSONArray2String(array string) ([]string, error) {
 	var stringSlice []string
-	err := json.Unmarshal([]byte(array),&stringSlice)
-	return stringSlice ,err
+	err := json.Unmarshal([]byte(array), &stringSlice)
+	return stringSlice, err
 }
-//json序列化 json格式的字符串   转换为对应浮点型切片
-func JSONArrayToFloat(array string) ([]float64,error) {
 
+/**
+ * 将json格式的数组转换为对应的浮点型数据的切片
+ */
+func JSONArray2Float(array string) ([]float64, error) {
 	var floatSlice []float64
-	err := json.Unmarshal([]byte(array),&floatSlice)
-	return floatSlice ,err
+	err := json.Unmarshal([]byte(array), &floatSlice)
+	return floatSlice, err
 }
