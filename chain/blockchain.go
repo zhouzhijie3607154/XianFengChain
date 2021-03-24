@@ -4,6 +4,7 @@ import (
 	"2021/_03_公链/XianFengChain04/transaction"
 	"2021/_03_公链/XianFengChain04/wallet"
 	"errors"
+	"fmt"
 	"github.com/boltdb/bolt"
 	"math/big"
 )
@@ -23,11 +24,11 @@ type BlockChain struct {
 	//cursor游标
 	//current
 	IteratorBlockHash [32]byte //表示当前迭代到了那个区块，该变量用于记录迭代到的区块hash
-	
+
 	Wallet *wallet.Wallet //引入钱包管理功能
 }
 
-func CreateChain(db *bolt.DB) BlockChain {
+func CreateChain(db *bolt.DB) (*BlockChain, error) {
 	var lastBlock Block
 	db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(BLOCKS))
@@ -42,13 +43,17 @@ func CreateChain(db *bolt.DB) BlockChain {
 		lastBlock, _ = Deserialize(lastBlockBytes)
 		return nil
 	})
-
-	return BlockChain{
+	wallet, err := wallet.LoadAddressFromDB(db)
+	if err != nil {
+		fmt.Println("初始化钱包失败,",err.Error())
+		return nil, err
+	}
+	return &BlockChain{
 		DB:                db,
 		LastBlock:         lastBlock,
 		IteratorBlockHash: lastBlock.Hash,
-		Wallet: ,
-	}
+		Wallet:            wallet,
+	}, nil
 }
 
 /**
@@ -299,11 +304,11 @@ func (chain *BlockChain) SearchUTXOsFromDB(addr string) []transaction.UTXO {
 /**
  * 该方法用于实现地址余额的统计
  */
-func (chain *BlockChain) GetBalance(addr string) (float64,error) {
+func (chain *BlockChain) GetBalance(addr string) (float64, error) {
 	//检查地址的合法性
 	isAddrValid := chain.Wallet.CheckAddress(addr)
 	if !isAddrValid {
-		return 0.0000,errors.New("非法地址")
+		return 0.0000, errors.New("非法地址")
 	}
 
 	_, totalBalance := chain.GetUTXOsWithBalance(addr, []transaction.Transaction{})

@@ -1,12 +1,12 @@
 package client
 
 import (
-	"2021/_03_公链/XianFengChain04/utils"
-	"fmt"
 	"2021/_03_公链/XianFengChain04/chain"
-	"os"
+	"2021/_03_公链/XianFengChain04/utils"
 	"flag"
+	"fmt"
 	"math/big"
+	"os"
 )
 
 /**
@@ -28,18 +28,20 @@ func (cmd *CmdClient) Run() {
 	}
 	//2、解析用户输入的第一个参数，作为功能命令进行解析
 	switch os.Args[1] {
-	case GENERATEGENSIS:
+	case GENERATEGENSIS: //创建创世区块链
 		cmd.GenerateGensis()
 	case SENDTRANSACTION: //发送交易..（前提：创世区块已存在）
 		cmd.SendTransaction()
 	case GETBALANCE: //获取某个地址的余额
 		cmd.GetBalance()
-	case GETLASTBLOCK:
+	case GETLASTBLOCK: //查询最新区块的功能
 		cmd.GetLastBlock()
-	case GETALLBLOCKS:
+	case GETALLBLOCKS: //查询所有区块的功能
 		cmd.GetAllBlocks()
 	case GETNEWADDRESS: //生成新地址的功能
 		cmd.GetNewAddress()
+	case GETALLADDRESS: //查询所有地址的功能
+		cmd.GetAllAddress()
 	case HELP:
 		cmd.Help()
 	default:
@@ -63,7 +65,6 @@ func (cmd *CmdClient) GetNewAddress() {
 		fmt.Println("抱歉，生成新地址功能无法解析参数，请重试！")
 		return
 	}
-
 	address, err := cmd.Chain.GetNewAddress()
 	if err != nil {
 		fmt.Println("生成地址遇到错误：", err.Error())
@@ -245,4 +246,24 @@ func (cmd *CmdClient) Help() {
 	fmt.Println("    help              use the command can print usage infomation.")
 	fmt.Println()
 	fmt.Println("Use go run main.go help [command] for more information about a command.")
+}
+
+func (cmd *CmdClient) GetAllAddress() {
+	//解析参数
+	getAllAddress := flag.NewFlagSet(GETALLADDRESS, flag.ExitOnError)
+	getAllAddress.Parse(os.Args[2:])
+
+	if len(os.Args[2:]) > 0 {
+		fmt.Println("该功能不需要参数.请检查格式后重试!")
+		return
+	}
+
+	//调用功能
+	list := cmd.Chain.Wallet.GetAddressList()
+
+	//输出所有地址
+	for i, address := range list {
+		fmt.Printf("第%d个地址:\t %s\n", i, address)
+	}
+
 }

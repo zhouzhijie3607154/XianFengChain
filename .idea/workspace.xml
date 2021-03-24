@@ -2,15 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="83f81a4e-b8e3-4317-8d61-55513b2fbaf8" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/chaincrypto/address.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/chaincrypto/crypto.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wallet/KeyPair.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wallet/wallent.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chain/blockchain.go" beforeDir="false" afterPath="$PROJECT_DIR$/chain/blockchain.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/client.go" beforeDir="false" afterPath="$PROJECT_DIR$/client/client.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/command.go" beforeDir="false" afterPath="$PROJECT_DIR$/client/command.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/convert.go" beforeDir="false" afterPath="$PROJECT_DIR$/utils/convert.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wallet/wallent.go" beforeDir="false" afterPath="$PROJECT_DIR$/wallet/wallent.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/公链开发文档" beforeDir="false" afterPath="$PROJECT_DIR$/公链开发文档" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -153,9 +150,9 @@
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state x="724" y="194" width="755" height="548" key="find.popup/0.0.1536.864@0.0.1536.864" timestamp="1614821283742" />
-    <state x="930" y="186" width="672" height="678" key="search.everywhere.popup" timestamp="1616567920681">
+    <state x="930" y="186" width="672" height="678" key="search.everywhere.popup" timestamp="1616574589142">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state x="930" y="186" width="672" height="678" key="search.everywhere.popup/0.0.1536.864@0.0.1536.864" timestamp="1616567920681" />
+    <state x="930" y="186" width="672" height="678" key="search.everywhere.popup/0.0.1536.864@0.0.1536.864" timestamp="1616574589142" />
   </component>
 </project>
