@@ -1,9 +1,9 @@
 package client
 
 import (
-	"2021/_03_公链/XianFengChain04/chain"
 	"2021/_03_公链/XianFengChain04/utils"
 	"fmt"
+	"2021/_03_公链/XianFengChain04/chain"
 	"os"
 	"flag"
 	"math/big"
@@ -32,12 +32,14 @@ func (cmd *CmdClient) Run() {
 		cmd.GenerateGensis()
 	case SENDTRANSACTION: //发送交易..（前提：创世区块已存在）
 		cmd.SendTransaction()
-	case GETBALANCE:
+	case GETBALANCE: //获取某个地址的余额
 		cmd.GetBalance()
 	case GETLASTBLOCK:
 		cmd.GetLastBlock()
 	case GETALLBLOCKS:
 		cmd.GetAllBlocks()
+	case GETNEWADDRESS: //生成新地址的功能
+		cmd.GetNewAddress()
 	case HELP:
 		cmd.Help()
 	default:
@@ -48,6 +50,26 @@ func (cmd *CmdClient) Run() {
 func (cmd *CmdClient) Default() {
 	fmt.Println("go run main.go：Unknown subcommand.")
 	fmt.Println("Run 'go run main.go help' for usage.")
+}
+
+/**
+ * 定义新的方法：用于生成新的地址
+ */
+func (cmd *CmdClient) GetNewAddress() {
+	getNewAddress := flag.NewFlagSet(GETNEWADDRESS, flag.ExitOnError)
+	getNewAddress.Parse(os.Args[2:])
+
+	if len(os.Args[2:]) > 0 {
+		fmt.Println("抱歉，生成新地址功能无法解析参数，请重试！")
+		return
+	}
+
+	address, err := cmd.Chain.GetNewAddress()
+	if err != nil {
+		fmt.Println("生成地址遇到错误：", err.Error())
+		return
+	}
+	fmt.Println("生成新的地址：", address)
 }
 
 func (cmd *CmdClient) GetAllBlocks() {
@@ -168,7 +190,11 @@ func (cmd *CmdClient) GetBalance() {
 		return
 	}
 	//2、调用余额查询功能
-	balance := blockChain.GetBalance(addr)
+	balance, err := blockChain.GetBalance(addr)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 	fmt.Printf("地址%s的余额是：%f\n", addr, balance)
 }
 
@@ -215,6 +241,7 @@ func (cmd *CmdClient) Help() {
 	fmt.Println("    getbalance        this is a command that can get the balance of specified address")
 	fmt.Println("    getlastblock      get the lastest block data.")
 	fmt.Println("    getallblocks      return all blocks data to user.")
+	fmt.Println("    getnewaddress     this commadn used to create a new address by bitcoin algorithm")
 	fmt.Println("    help              use the command can print usage infomation.")
 	fmt.Println()
 	fmt.Println("Use go run main.go help [command] for more information about a command.")

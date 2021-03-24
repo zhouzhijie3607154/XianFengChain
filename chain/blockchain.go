@@ -2,6 +2,7 @@ package chain
 
 import (
 	"2021/_03_公链/XianFengChain04/transaction"
+	"2021/_03_公链/XianFengChain04/wallet"
 	"errors"
 	"github.com/boltdb/bolt"
 	"math/big"
@@ -22,6 +23,8 @@ type BlockChain struct {
 	//cursor游标
 	//current
 	IteratorBlockHash [32]byte //表示当前迭代到了那个区块，该变量用于记录迭代到的区块hash
+	
+	Wallet *wallet.Wallet //引入钱包管理功能
 }
 
 func CreateChain(db *bolt.DB) BlockChain {
@@ -39,10 +42,12 @@ func CreateChain(db *bolt.DB) BlockChain {
 		lastBlock, _ = Deserialize(lastBlockBytes)
 		return nil
 	})
+
 	return BlockChain{
 		DB:                db,
 		LastBlock:         lastBlock,
 		IteratorBlockHash: lastBlock.Hash,
+		Wallet: ,
 	}
 }
 
@@ -50,6 +55,11 @@ func CreateChain(db *bolt.DB) BlockChain {
  * 创建coinbase交易的方法
  */
 func (chain *BlockChain) CreateCoinBase(addr string) error {
+	//新功能: 对用户传递的地址进行有效性地址检查
+	isAddrValid := chain.Wallet.CheckAddress(addr)
+	if !isAddrValid {
+		return errors.New("输入的地址不合法,请检查后重试!")
+	}
 	//1、创建一笔coinbase交易
 	coinbase, err := transaction.CreateCoinBase(addr)
 	if err != nil {
@@ -231,7 +241,7 @@ func (chain *BlockChain) Next() Block {
 /**
  * 该方法用于查询出指定地址的UTXOs集合并返回
  */
-func (chain *BlockChain) SearchUTXOsFromDB(addr string) ([]transaction.UTXO) {
+func (chain *BlockChain) SearchUTXOsFromDB(addr string) []transaction.UTXO {
 
 	//花费记录的容器
 	spend := make([]transaction.TxInput, 0)
@@ -289,9 +299,15 @@ func (chain *BlockChain) SearchUTXOsFromDB(addr string) ([]transaction.UTXO) {
 /**
  * 该方法用于实现地址余额的统计
  */
-func (chain *BlockChain) GetBalance(addr string) float64 {
-	_, totalBalance := chain.GetUTXOsWithBalance(addr,[]transaction.Transaction{})
-	return totalBalance
+func (chain *BlockChain) GetBalance(addr string) (float64,error) {
+	//检查地址的合法性
+	isAddrValid := chain.Wallet.CheckAddress(addr)
+	if !isAddrValid {
+		return 0.0000,errors.New("非法地址")
+	}
+
+	_, totalBalance := chain.GetUTXOsWithBalance(addr, []transaction.Transaction{})
+	return totalBalance, nil
 }
 
 /**
@@ -356,6 +372,15 @@ func (chain BlockChain) GetUTXOsWithBalance(addr string, txs []transaction.Trans
  * 定义区块链的发送交易的功能
  */
 func (chain *BlockChain) SendTransaction(froms []string, tos []string, amounts []float64) error {
+	//增加地址合法性检查功能
+	for i := 0; i < len(froms); i++ {
+		isFormValid := chain.Wallet.CheckAddress(froms[i])
+		isToValid := chain.Wallet.CheckAddress(tos[i])
+		if !isFormValid || !isToValid {
+			return errors.New("地址不合法,请检查后重试!")
+		}
+	}
+
 	//from: [davie laowang]
 	//to :  [zhangsan lisi]
 	//amounts: [10 5]
@@ -399,4 +424,9 @@ func (chain *BlockChain) SendTransaction(froms []string, tos []string, amounts [
 	}
 
 	return nil
+}
+
+//创建新地址
+func (chain *BlockChain) GetNewAddress() (string, error) {
+	return chain.Wallet.NewAddress()
 }
