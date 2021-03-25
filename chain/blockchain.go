@@ -3,6 +3,7 @@ package chain
 import (
 	"2021/_03_公链/XianFengChain04/transaction"
 	"2021/_03_公链/XianFengChain04/wallet"
+	"crypto/ecdsa"
 	"errors"
 	"fmt"
 	"github.com/boltdb/bolt"
@@ -435,3 +436,10 @@ func (chain *BlockChain) SendTransaction(froms []string, tos []string, amounts [
 func (chain *BlockChain) GetNewAddress() (string, error) {
 	return chain.Wallet.NewAddress()
 }
+
+//导出指定地址的私钥
+func (chain *BlockChain) DumpPrivateKey(addr string)(*ecdsa.PrivateKey,error){
+	return chain.Wallet.DumpPrivateKey(addr)
+}
+
+

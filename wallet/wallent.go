@@ -3,6 +3,7 @@ package wallet
 import (
 	"2021/_03_公链/XianFengChain04/utils"
 	"bytes"
+	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/sha256"
 	"encoding/gob"
@@ -66,7 +67,7 @@ func (wallet *Wallet) NewAddress() (string, error) {
 	wallet.Address[address] = keyPair
 	err = wallet.SaveAddressToDB()
 	if err != nil {
-		fmt.Println("保存地址出现错误",err.Error())
+		fmt.Println("保存地址出现错误", err.Error())
 	}
 
 	return address, err
@@ -100,7 +101,7 @@ func (wallet *Wallet) CheckAddress(addr string) bool {
 /*
 钱包中的地址持久化到DB文件中
 */
-func (wallet *Wallet) SaveAddressToDB()(error) {
+func (wallet *Wallet) SaveAddressToDB() error {
 	var err error
 	err = wallet.Engine.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(KEYSTORE))
@@ -118,12 +119,12 @@ func (wallet *Wallet) SaveAddressToDB()(error) {
 		encoder := gob.NewEncoder(buff)
 		err = encoder.Encode(wallet.Address)
 		if err != nil {
-			fmt.Println("gob加密出错了",err.Error())
+			fmt.Println("gob加密出错了", err.Error())
 			return err
 		}
-		err= bucket.Put([]byte(ADDRESSS_KEY), buff.Bytes())
+		err = bucket.Put([]byte(ADDRESSS_KEY), buff.Bytes())
 		//todo
-		fmt.Println("存了啥进去呀",wallet.Address)
+		fmt.Println("存了啥进去呀", wallet.Address)
 		return err
 	})
 	return err
@@ -132,49 +133,72 @@ func (wallet *Wallet) SaveAddressToDB()(error) {
 /*
 加载DB文件中的所有钱包地址
 */
-func LoadAddressFromDB(db *bolt.DB)(*Wallet,error){
+func LoadAddressFromDB(db *bolt.DB) (*Wallet, error) {
 	var err error
 	var address = make(map[string]*KeyPair)
-		err = db.View(func(tx *bolt.Tx) error {
-			bucket := tx.Bucket([]byte(KEYSTORE))
-			//如果KeyStore桶不存在,创建KeyStore桶
-			if bucket == nil {
-				return errors.New("都没桶呢,你在捣鼓啥?")
-			}
+	err = db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(KEYSTORE))
+		//如果KeyStore桶不存在,创建KeyStore桶
+		if bucket == nil {
+			return errors.New("都没桶呢,你在捣鼓啥?")
+		}
 
-			//如果有KeyStore桶,读取数据
-			addressBytes := bucket.Get([]byte(ADDRESSS_KEY))
-			//如果桶中有数据...取出address...反序列化
-			if len(addressBytes) >= 0 {
-				//gob注册接口 编码
-				gob.Register(elliptic.P256())
-				decoder := gob.NewDecoder(bytes.NewReader(addressBytes))
-				err = decoder.Decode(&address)
-			}
+		//如果有KeyStore桶,读取数据
+		addressBytes := bucket.Get([]byte(ADDRESSS_KEY))
+		//如果桶中有数据...取出address...反序列化
+		if len(addressBytes) >= 0 {
+			//gob注册接口 编码
+			gob.Register(elliptic.P256())
+			decoder := gob.NewDecoder(bytes.NewReader(addressBytes))
+			err = decoder.Decode(&address)
+		}
 
 		return err
 	})
-	if err !=nil {
-		return nil,err
+	if err != nil {
+		return nil, err
 	}
 	//创建Wallet
 	return &Wallet{
 		Address: address,
 		Engine:  db,
-	},nil
+	}, nil
 }
+
 /**
 查询钱包中的所有地址
- */
-func(wallet *Wallet)GetAddressList()([]string){
+*/
+func (wallet *Wallet) GetAddressList() []string {
 	addressList := make([]string, 0)
 
-	for address,_ := range wallet.Address{
+	for address, _ := range wallet.Address {
 		addressList = append(addressList, address)
 	}
 	return addressList
 }
 
+/*
+给定一个地址,返回其对应的私钥
+*/
+func (wallet *Wallet) DumpPrivateKey(addr string) (*ecdsa.PrivateKey, error) {
+	//1.地址合法性检查
+	isValid := wallet.CheckAddress(addr)
+	if !isValid {
+		return  nil,errors.New("地址格式错误,请检查后重试!")
+	}
+
+	//2.钱包非空检查
+	if wallet.Address == nil {
+		return nil,errors.New("当前钱包地址为 空  ,查询失败!")
+	}
+
+	//3.查询地址的私钥
+	keyPari := wallet.Address[addr]
+	if keyPari == nil {
+		return nil,errors.New("当前钱包未找到对应地址的私钥")
+	}
+	return keyPari.Priv,nil
+}
 
 // 1EpRnkdAYinLhmFhJUvonZYnHwdVQ359fp
 // 1JQrgBshyApwBReEoCM4XSVbiPbTFVSWy1

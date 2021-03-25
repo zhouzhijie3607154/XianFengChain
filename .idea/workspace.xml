@@ -6,9 +6,8 @@
       <change beforePath="$PROJECT_DIR$/chain/blockchain.go" beforeDir="false" afterPath="$PROJECT_DIR$/chain/blockchain.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/client.go" beforeDir="false" afterPath="$PROJECT_DIR$/client/client.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/command.go" beforeDir="false" afterPath="$PROJECT_DIR$/client/command.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wallet/wallent.go" beforeDir="false" afterPath="$PROJECT_DIR$/wallet/wallent.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/公链开发文档" beforeDir="false" afterPath="$PROJECT_DIR$/公链开发文档" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/xianfengchain04.db" beforeDir="false" afterPath="$PROJECT_DIR$/xianfengchain04.db" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,7 +46,7 @@
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="settings.editor.selected.configurable" value="reference.idesettings.quicklists" />
+    <property name="settings.editor.selected.configurable" value="editor.preferences.appearance" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -142,10 +141,10 @@
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state width="1006" height="217" key="GridCell.Tab.0.right/0.0.1536.864@0.0.1536.864" timestamp="1616482925599" />
-    <state x="544" y="80" key="SettingsEditor" timestamp="1616569371727">
+    <state x="544" y="80" key="SettingsEditor" timestamp="1616631955543">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state x="544" y="80" key="SettingsEditor/0.0.1536.864@0.0.1536.864" timestamp="1616569371727" />
+    <state x="544" y="80" key="SettingsEditor/0.0.1536.864@0.0.1536.864" timestamp="1616631955543" />
     <state x="724" y="194" width="755" height="548" key="find.popup" timestamp="1614821283742">
       <screen x="0" y="0" width="1536" height="864" />
     </state>

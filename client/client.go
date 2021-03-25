@@ -3,6 +3,7 @@ package client
 import (
 	"2021/_03_公链/XianFengChain04/chain"
 	"2021/_03_公链/XianFengChain04/utils"
+	"encoding/hex"
 	"flag"
 	"fmt"
 	"math/big"
@@ -42,6 +43,8 @@ func (cmd *CmdClient) Run() {
 		cmd.GetNewAddress()
 	case GETALLADDRESS: //查询所有地址的功能
 		cmd.GetAllAddress()
+	case DUMPPRIKEY:
+		cmd.DumpPrivateKey() //导出特定地址的私钥文件
 	case HELP:
 		cmd.Help()
 	default:
@@ -266,4 +269,22 @@ func (cmd *CmdClient) GetAllAddress() {
 		fmt.Printf("第%d个地址:\t %s\n", i, address)
 	}
 
+}
+func (cmd *CmdClient) DumpPrivateKey() {
+	//1.解析用户输入的参数
+	dumpPrivateKey := flag.NewFlagSet(DUMPPRIKEY, flag.ExitOnError)
+	address := dumpPrivateKey.String("address", "", "用于指定要导出私钥的地址")
+	dumpPrivateKey.Parse(os.Args[2:])
+	//2.参数长度检查
+	if len(os.Args[2:]) > 2 {
+		fmt.Println("你输入的格式不正确,请检查后重试,更多信息使用 help 获得")
+	}
+
+	//3.查询对应地址的私钥
+	pri, err := cmd.Chain.DumpPrivateKey(*address)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	fmt.Println("该地址的私钥为:", hex.EncodeToString(pri.D.Bytes()))
 }
