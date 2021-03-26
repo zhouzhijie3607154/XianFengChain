@@ -6,8 +6,13 @@
       <change beforePath="$PROJECT_DIR$/chain/blockchain.go" beforeDir="false" afterPath="$PROJECT_DIR$/chain/blockchain.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/client.go" beforeDir="false" afterPath="$PROJECT_DIR$/client/client.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/command.go" beforeDir="false" afterPath="$PROJECT_DIR$/client/command.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transaction/transaction.go" beforeDir="false" afterPath="$PROJECT_DIR$/transaction/transaction.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transaction/txinput.go" beforeDir="false" afterPath="$PROJECT_DIR$/transaction/txinput.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transaction/txoutput.go" beforeDir="false" afterPath="$PROJECT_DIR$/transaction/txoutput.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transaction/utxo.go" beforeDir="false" afterPath="$PROJECT_DIR$/transaction/utxo.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wallet/wallent.go" beforeDir="false" afterPath="$PROJECT_DIR$/wallet/wallent.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianfengchain04.db" beforeDir="false" afterPath="$PROJECT_DIR$/xianfengchain04.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/xianfengchain04.db" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/公链开发文档" beforeDir="false" afterPath="$PROJECT_DIR$/公链开发文档" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,7 +61,7 @@
       <recent name="E:\Code\Golang\GoProjects\src\2021\_03_公链\XianFengChain04\transaction" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Build.go build 2021/_03_公链/XianFengChain04">
+  <component name="RunManager" selected="Go Build.go build wallent.go">
     <configuration name="go build 2021/_03_公链/XianFengChain04" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="XianFengChain04" />
       <working_directory value="$PROJECT_DIR$" />
@@ -84,13 +89,24 @@
       <directory value="$PROJECT_DIR$/" />
       <method v="2" />
     </configuration>
+    <configuration name="go build wallent.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="XianFengChain04" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <kind value="FILE" />
+      <filePath value="$PROJECT_DIR$/wallet/wallent.go" />
+      <package value="2021/_03_公链/XianFengChain04" />
+      <directory value="$PROJECT_DIR$/" />
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Go Build.go build 2021/_03_公链/XianFengChain04" />
       <item itemvalue="Go Build.go build client.go" />
       <item itemvalue="Go Build.go build main.go" />
+      <item itemvalue="Go Build.go build wallent.go" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Build.go build wallent.go" />
         <item itemvalue="Go Build.go build 2021/_03_公链/XianFengChain04" />
         <item itemvalue="Go Build.go build main.go" />
         <item itemvalue="Go Build.go build client.go" />
@@ -109,6 +125,10 @@
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state x="702" y="299" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1536.864@0.0.1536.864" timestamp="1614752177430" />
+    <state x="879" y="156" key="#com.intellij.ide.util.MemberChooser" timestamp="1616639870136">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state x="879" y="156" key="#com.intellij.ide.util.MemberChooser/0.0.1536.864@0.0.1536.864" timestamp="1616639870136" />
     <state x="699" y="159" key="#go_build_2021/_03_公链/XianFengChain04" timestamp="1614752129950">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
@@ -121,6 +141,10 @@
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state x="484" y="93" key="#go_build_client.go/0.0.1536.864@0.0.1536.864" timestamp="1615435400318" />
+    <state x="788" y="97" key="#go_build_wallent.go" timestamp="1616722810015">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state x="788" y="97" key="#go_build_wallent.go/0.0.1536.864@0.0.1536.864" timestamp="1616722810015" />
     <state x="752" y="248" key="FileChooserDialogImpl" timestamp="1616076455740">
       <screen x="0" y="0" width="1536" height="864" />
     </state>

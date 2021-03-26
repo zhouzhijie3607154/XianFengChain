@@ -237,6 +237,49 @@ gob编码 : ① gob编码结构体,结构体包含若干字段,比如 int .strin
           ②gob编码结构体 ,其中包含接口类型. Curve
 
 
+2021年3月25日10:23:02
+钱包模块
+    查询所有地址
+    导出指定地址的私钥
+
+  签名:  转账交易需要签名
+
+  addr1 的 私钥 对交易进行 签名
+            output : 把钱锁在add2
+
+    ScriptSig:解锁脚本
+                     <sig> <pubK>
+    ScriptPubK:锁定脚本
+           DUP HASH160 <PubKHash> EQUALVERIFY CHECKSIG
+       操作指令 :  DUP HASH160  EQUALVERIFY CHECKSIG
+       数据 :  <sig> <pubK> <PubKHash>
+       指令栈 : 压栈 和 弹栈
+       指令 : 3 2 ADD 5 EQUAL
+
+公钥hash:
+    公钥hash --> 推导计算 --> 地址
+
+    已有地址 --> 反向推导 --> 公钥hash
+    addr - >base58解码 --> 去除校验和
+
+第0个地址:       1Bfz1ZYmvuxcA9sSj6R6v6zcFAMdVFe3c3
+第1个地址:       1b4XDRdX4nxcotsQ2yMfbzjJ4vY2qhyyS
+
+go run main.go generategenesis -address 1Bfz1ZYmvuxcA9sSj6R6v6zcFAMdVFe3c3
+恭喜！生成了一笔COINBASE交易，奖励已到账。
+
+go run main.go getbalance -address 1Bfz1ZYmvuxcA9sSj6R6v6zcFAMdVFe3c3
+地址1Bfz1ZYmvuxcA9sSj6R6v6zcFAMdVFe3c3的余额是：50.000000
+
+go run main.go getbalance -address 1b4XDRdX4nxcotsQ2yMfbzjJ4vY2qhyyS
+地址1Bfz1ZYmvuxcA9sSj6R6v6zcFAMdVFe3c3的余额是：0.000000
+
+go run main.go sendtransaction -from [\"1Bfz1ZYmvuxcA9sSj6R6v6zcFAMdVFe3c3\",\"1b4XDRdX4nxcotsQ2yMfbzjJ4vY2qhyyS\"] -to [\"1b4XDRdX4nxcotsQ2yMfbzjJ4vY2qhyyS\",\"1Bfz1ZYmvuxcA9sSj6R6v6zcFAMdVFe3c3\"] -amount [30,5]
+
+
+
+go run main.go sendtransaction -from [\"13mLgGrTHNBAMtGoq5ke1JUPq4ykUfRygR\"] -to [\"1PW5pnpJa7he33WEsmRe2uBS7KmwNXDZeA\"] -amount [30]
+
 
 
 

@@ -1,7 +1,7 @@
 package client
 
 const (
-	GENERATEGENSIS  = "generategensis"  //ccoinbase -addr
+	GENERATEGENSIS  = "generategenesis"  //ccoinbase -addr
 	SENDTRANSACTION = "sendtransaction" //sendTransaction from to amount
 	GETBALANCE      = "getbalance"      //获取地址的余额功能
 	GETLASTBLOCK    = "getlastblock"    //获取最新区块

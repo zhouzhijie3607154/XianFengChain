@@ -89,10 +89,10 @@ func (cmd *CmdClient) GetAllBlocks() {
 		for index, tx := range block.Transactions {
 			fmt.Printf("   第%d笔交易,交易hash:%x\n", index, tx.TxHash)
 			for inputIndex, input := range tx.Inputs {
-				fmt.Printf("       第%d笔交易输入,%s花了%x的%d的钱\n", inputIndex, input.ScriptSig, input.TxId, input.Vout)
+				fmt.Printf("       第%d笔交易输入,%x花了%x的%d的钱\n", inputIndex, input.PubK, input.TxId, input.Vout)
 			}
 			for outputIndex, output := range tx.Outputs {
-				fmt.Printf("       第%d笔交易输出,%s实现收入%f\n", outputIndex, output.ScriptPub, output.Value)
+				fmt.Printf("       第%d笔交易输出,%x实现收入%f\n", outputIndex, output.PubKHash, output.Value)
 			}
 		}
 		fmt.Println()
@@ -264,6 +264,9 @@ func (cmd *CmdClient) GetAllAddress() {
 	//调用功能
 	list := cmd.Chain.Wallet.GetAddressList()
 
+	if len(list) <=0{
+		fmt.Println(" 抱歉,钱包中暂无任何地址,您可以通过命令 getnewaddress 来生成一个新地址 ")
+	}
 	//输出所有地址
 	for i, address := range list {
 		fmt.Printf("第%d个地址:\t %s\n", i, address)
@@ -281,10 +284,10 @@ func (cmd *CmdClient) DumpPrivateKey() {
 	}
 
 	//3.查询对应地址的私钥
-	pri, err := cmd.Chain.DumpPrivateKey(*address)
+	keyPair, err := cmd.Chain.DumpPrivateKey(*address)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
-	fmt.Println("该地址的私钥为:", hex.EncodeToString(pri.D.Bytes()))
+	fmt.Println("该地址的私钥为:", hex.EncodeToString(keyPair.Priv.D.Bytes()))
 }

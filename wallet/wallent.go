@@ -3,7 +3,6 @@ package wallet
 import (
 	"2021/_03_公链/XianFengChain04/utils"
 	"bytes"
-	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/sha256"
 	"encoding/gob"
@@ -31,6 +30,8 @@ var KEYSTORE = "KeyStore"
 //存地址的 Key
 var ADDRESSS_KEY = "addressKey"
 
+//比特币地址版本号
+var VERSION = []byte{0x00}
 /**
   新生成一个比特币的地址,
 */
@@ -48,7 +49,7 @@ func (wallet *Wallet) NewAddress() (string, error) {
 	ripe.Write(pubHash[:])
 	ripemdPub := ripe.Sum(nil)
 	//5、追加版本号
-	versionPub := append([]byte{0x00}, ripemdPub...)
+	versionPub := append(VERSION, ripemdPub...)
 
 	//6、两次哈希
 	firstHash := utils.Hash256(versionPub)
@@ -75,7 +76,7 @@ func (wallet *Wallet) NewAddress() (string, error) {
 
 //该函数用于检查地址是否合法,返回一个bool类型的值,合法返回true 否则false
 func (wallet *Wallet) CheckAddress(addr string) bool {
-	if len(addr) <= 8 {
+	if len(addr) <= 5 {
 		return false
 	}
 
@@ -123,8 +124,7 @@ func (wallet *Wallet) SaveAddressToDB() error {
 			return err
 		}
 		err = bucket.Put([]byte(ADDRESSS_KEY), buff.Bytes())
-		//todo
-		fmt.Println("存了啥进去呀", wallet.Address)
+
 		return err
 	})
 	return err
@@ -136,17 +136,20 @@ func (wallet *Wallet) SaveAddressToDB() error {
 func LoadAddressFromDB(db *bolt.DB) (*Wallet, error) {
 	var err error
 	var address = make(map[string]*KeyPair)
-	err = db.View(func(tx *bolt.Tx) error {
+	err = db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(KEYSTORE))
 		//如果KeyStore桶不存在,创建KeyStore桶
 		if bucket == nil {
-			return errors.New("都没桶呢,你在捣鼓啥?")
+			bucket, err = tx.CreateBucket([]byte(KEYSTORE))
+			if err != nil {
+				return err
+			}
 		}
 
 		//如果有KeyStore桶,读取数据
 		addressBytes := bucket.Get([]byte(ADDRESSS_KEY))
 		//如果桶中有数据...取出address...反序列化
-		if len(addressBytes) >= 0 {
+		if len(addressBytes) > 0 {
 			//gob注册接口 编码
 			gob.Register(elliptic.P256())
 			decoder := gob.NewDecoder(bytes.NewReader(addressBytes))
@@ -178,9 +181,9 @@ func (wallet *Wallet) GetAddressList() []string {
 }
 
 /*
-给定一个地址,返回其对应的私钥
+给定一个地址,返回其对应的密钥对
 */
-func (wallet *Wallet) DumpPrivateKey(addr string) (*ecdsa.PrivateKey, error) {
+func (wallet *Wallet) DumpKeyPair(addr string) (*KeyPair, error) {
 	//1.地址合法性检查
 	isValid := wallet.CheckAddress(addr)
 	if !isValid {
@@ -197,12 +200,13 @@ func (wallet *Wallet) DumpPrivateKey(addr string) (*ecdsa.PrivateKey, error) {
 	if keyPari == nil {
 		return nil,errors.New("当前钱包未找到对应地址的私钥")
 	}
-	return keyPari.Priv,nil
+	return keyPari,nil
 }
 
-// 1EpRnkdAYinLhmFhJUvonZYnHwdVQ359fp
-// 1JQrgBshyApwBReEoCM4XSVbiPbTFVSWy1
-// 12K2rdAgZpzC9TFvLbfwRgDfjrgHrTVusS
+//获取地址对应的密钥对
+func (wallet *Wallet) GetKeyPairByAddr(addr string) (*KeyPair) {
+	return wallet.Address[addr]
+}
 
 /** 存储所有地址到DB文件时  map中的address值太离散了, 不放便取值 (Address) ,改为 map 直接序列化 : gob注册接口 Curve
 *for address, keyPair := range wallet.Address {

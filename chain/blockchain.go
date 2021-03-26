@@ -3,7 +3,6 @@ package chain
 import (
 	"2021/_03_公链/XianFengChain04/transaction"
 	"2021/_03_公链/XianFengChain04/wallet"
-	"crypto/ecdsa"
 	"errors"
 	"fmt"
 	"github.com/boltdb/bolt"
@@ -46,7 +45,7 @@ func CreateChain(db *bolt.DB) (*BlockChain, error) {
 	})
 	wallet, err := wallet.LoadAddressFromDB(db)
 	if err != nil {
-		fmt.Println("初始化钱包失败,",err.Error())
+		fmt.Println("初始化钱包失败,", err.Error())
 		return nil, err
 	}
 	return &BlockChain{
@@ -61,18 +60,21 @@ func CreateChain(db *bolt.DB) (*BlockChain, error) {
  * 创建coinbase交易的方法
  */
 func (chain *BlockChain) CreateCoinBase(addr string) error {
-	//新功能: 对用户传递的地址进行有效性地址检查
+	//参数检查 : 对用户传递的地址进行有效性地址检查
 	isAddrValid := chain.Wallet.CheckAddress(addr)
 	if !isAddrValid {
 		return errors.New("输入的地址不合法,请检查后重试!")
 	}
+
 	//1、创建一笔coinbase交易
 	coinbase, err := transaction.CreateCoinBase(addr)
 	if err != nil {
 		return err
 	}
+
 	//2、把coinbase交易存到区块中
 	err = chain.CreateGensis([]transaction.Transaction{*coinbase})
+
 	return err
 }
 
@@ -263,22 +265,16 @@ func (chain *BlockChain) SearchUTXOsFromDB(addr string) []transaction.UTXO {
 			//a、遍历每个交易的交易输入
 			for _, input := range tx.Inputs {
 				//找到了花费记录
-				if string(input.ScriptSig) != addr {
-					continue
+				if input.VerifyInputWithAddress(addr) {
+					spend = append(spend, input)
 				}
-				spend = append(spend, input)
 			}
-			//b、遍历每个交易的交易输出:收入
+			//b、遍历每个交易的交易输出:收入的钱记录下来
 			for index, output := range tx.Outputs {
-				if string(output.ScriptPub) != addr {
-					continue
+				if output.CheckPubKHashWithAddr(addr) {
+					utxo := transaction.NewUTXO(tx.TxHash, index, output)
+					inCome = append(inCome, utxo)
 				}
-				utxo := transaction.UTXO{
-					TxId:     tx.TxHash,
-					Vout:     index,
-					TxOutput: output,
-				}
-				inCome = append(inCome, utxo)
 			}
 		}
 	}
@@ -289,8 +285,7 @@ func (chain *BlockChain) SearchUTXOsFromDB(addr string) []transaction.UTXO {
 	for _, come := range inCome {
 		isComeSpent = false
 		for _, spen := range spend {
-			if come.TxId == spen.TxId && come.Vout == spen.Vout {
-				//该笔收入已被花费
+			if come.IsUTXOSpent(spen) {//该笔收入已被花费
 				isComeSpent = true
 				break
 			}
@@ -324,47 +319,41 @@ func (chain BlockChain) GetUTXOsWithBalance(addr string, txs []transaction.Trans
 	dbUtxos := chain.SearchUTXOsFromDB(addr)
 
 	//2、找一遍内存中已经存在但还未存到文件中的交易
-	// 看一看是否已经花了某个bolt.DB文件中的utxo, 如果某个utxo被花掉了，应该剔除掉
-
 	memSpends := make([]transaction.TxInput, 0)
 	memInComes := make([]transaction.UTXO, 0)
 	for _, tx := range txs {
-		//a、遍历交易输入，把花的钱记录下来
+		//a、遍历交易输入，把花出去的钱记录下来
 		for _, input := range tx.Inputs {
-			if string(input.ScriptSig) == addr {
+			if input.VerifyInputWithAddress(addr) {// input 属于 addr
 				memSpends = append(memSpends, input)
 			}
 		}
-		//b、遍历交易输出，把收入的钱记录下来
+		//b、遍历交易输出，把得到的钱记录下来
 		for outIndex, output := range tx.Outputs {
-			if string(output.ScriptPub) == addr {
-				utxo := transaction.UTXO{
-					TxId:     tx.TxHash,
-					Vout:     outIndex,
-					TxOutput: output,
-				}
+			if output.CheckPubKHashWithAddr(addr) { // output 属于 addr
+				utxo := transaction.NewUTXO(tx.TxHash, outIndex, output)
 				memInComes = append(memInComes, utxo)
 			}
 		}
 	}
-
 	//3、经过内存中的交易的遍历以后，剩下的才是最终可用的utxo集合
 	utxos := make([]transaction.UTXO, 0)
 	var isUTXOSpend bool
-	for _, utxo := range dbUtxos {
+
+	for _, utxo := range dbUtxos {//遍历dbUTXO集合,看看内存中是否有已经花费了的
 		isUTXOSpend = false
+
 		for _, spend := range memSpends {
-			if string(utxo.TxId[:]) == string(spend.TxId[:]) &&
-				utxo.Vout == spend.Vout &&
-				string(utxo.ScriptPub) == string(spend.ScriptSig) {
+			if utxo.IsUTXOSpent(spend) {
 				isUTXOSpend = true
 			}
 		}
+
 		if !isUTXOSpend {
 			utxos = append(utxos, utxo)
 		}
 	}
-	//把内存中的收入也加入到可用的utxo集合中
+	//把内存中的交易输出也加入到可用的utxo集合中
 	utxos = append(utxos, memInComes...)
 
 	var totalBalance float64
@@ -376,9 +365,12 @@ func (chain BlockChain) GetUTXOsWithBalance(addr string, txs []transaction.Trans
 
 /**
  * 定义区块链的发送交易的功能
+ * @param froms 交易发送者的地址切片
+ * @param tos 交易收款者的地址切片
+ * @param amount 交易的金额切片
  */
 func (chain *BlockChain) SendTransaction(froms []string, tos []string, amounts []float64) error {
-	//增加地址合法性检查功能
+	//1.地址合法性检查,非法地址直接返回一个错误
 	for i := 0; i < len(froms); i++ {
 		isFormValid := chain.Wallet.CheckAddress(froms[i])
 		isToValid := chain.Wallet.CheckAddress(tos[i])
@@ -387,21 +379,20 @@ func (chain *BlockChain) SendTransaction(froms []string, tos []string, amounts [
 		}
 	}
 
-	//from: [davie laowang]
-	//to :  [zhangsan lisi]
-	//amounts: [10 5]
-	//遍历:
-	//1、davie zhangsan 10
-	//2、laowang lisi 5
-
+	//2.创建一个交易切片,用于存储生成的交易
 	newTxs := make([]transaction.Transaction, 0) //内存
-	//遍历
+
+	//3.遍历交易发起者列表,拿到下标 from_index 每个切片的长度都相同,所以通用
 	for from_index, from := range froms {
-		//1、先把from的可花费的utxos给找出来
+		//3.1 先把from的可花费的utxos给找出来
 		utxos, totalBalance := chain.GetUTXOsWithBalance(from, newTxs)
+
+		//3.2 如果from的钱不够,终止交易
 		if totalBalance < amounts[from_index] {
 			return errors.New(from + "余额不足，赶紧去搬砖挣钱")
 		}
+
+		//3.3 如果from的钱够用,判断需要哪些钱? 切片中多少钱就够本次交易花费
 		totalBalance = 0
 		var utxoNum int
 		for index, utxo := range utxos {
@@ -412,18 +403,28 @@ func (chain *BlockChain) SendTransaction(froms []string, tos []string, amounts [
 			}
 		}
 
-		//2、可花费的钱总额比要花费的钱数额大，才构建交易
+		//3.4取出交易发起者的私钥,用于创建一笔新的交易 newTx
+		fromKeyPair := chain.Wallet.GetKeyPairByAddr(from)
+
 		newTx, err := transaction.CreateNewTransaction(utxos[0:utxoNum+1],
 			from,
 			tos[from_index],
+			fromKeyPair.Pub,
 			amounts[from_index])
-
 		if err != nil {
 			return err
 		}
+
+		//3.4.1 对签名验证,只有签名通过,才能将
+		err = newTx.SignTx(fromKeyPair.Priv,utxos[0:utxoNum+1])
+		if err != nil {
+			return err
+		}
+		//3.5新的交易 newTx 添加到 之前创建的 交易切片
 		newTxs = append(newTxs, *newTx)
 	}
 
+	// 4. 创建区块,把交易切片扔进去
 	err := chain.CreateNewBlock(newTxs)
 	if err != nil {
 		return err
@@ -437,9 +438,7 @@ func (chain *BlockChain) GetNewAddress() (string, error) {
 	return chain.Wallet.NewAddress()
 }
 
-//导出指定地址的私钥
-func (chain *BlockChain) DumpPrivateKey(addr string)(*ecdsa.PrivateKey,error){
-	return chain.Wallet.DumpPrivateKey(addr)
+//导出指定地址的密钥对
+func (chain *BlockChain) DumpPrivateKey(addr string) (*wallet.KeyPair, error) {
+	return chain.Wallet.DumpKeyPair(addr)
 }
-
-
