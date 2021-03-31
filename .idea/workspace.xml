@@ -4,13 +4,9 @@
     <list default="true" id="83f81a4e-b8e3-4317-8d61-55513b2fbaf8" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chain/blockchain.go" beforeDir="false" afterPath="$PROJECT_DIR$/chain/blockchain.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/client.go" beforeDir="false" afterPath="$PROJECT_DIR$/client/client.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/command.go" beforeDir="false" afterPath="$PROJECT_DIR$/client/command.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/transaction/transaction.go" beforeDir="false" afterPath="$PROJECT_DIR$/transaction/transaction.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/transaction/txinput.go" beforeDir="false" afterPath="$PROJECT_DIR$/transaction/txinput.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/transaction/txoutput.go" beforeDir="false" afterPath="$PROJECT_DIR$/transaction/txoutput.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/transaction/utxo.go" beforeDir="false" afterPath="$PROJECT_DIR$/transaction/utxo.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wallet/wallent.go" beforeDir="false" afterPath="$PROJECT_DIR$/wallet/wallent.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/convert.go" beforeDir="false" afterPath="$PROJECT_DIR$/utils/convert.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/xianfengchain04.db" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/公链开发文档" beforeDir="false" afterPath="$PROJECT_DIR$/公链开发文档" afterDir="false" />
     </list>
@@ -26,15 +22,22 @@
       </list>
     </option>
   </component>
-  <component name="GOROOT" path="D:\Go" />
+  <component name="GOROOT" path="D:\Environment\Go" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
   </component>
   <component name="ProjectId" id="1pEdGRFcHlzs1dK9GM2ATL1QUrY" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
-    <option name="showExcludedFiles" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
@@ -51,7 +54,7 @@
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="settings.editor.selected.configurable" value="editor.preferences.appearance" />
+    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.Language Defaults" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -61,11 +64,11 @@
       <recent name="E:\Code\Golang\GoProjects\src\2021\_03_公链\XianFengChain04\transaction" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Build.go build wallent.go">
+  <component name="RunManager" selected="Go Build.go build 2021/_03_公链/XianFengChain04">
     <configuration name="go build 2021/_03_公链/XianFengChain04" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="XianFengChain04" />
       <working_directory value="$PROJECT_DIR$" />
-      <parameters value="generategenesis -genesis hello" />
+      <parameters value="sendtransaction -from [\&quot;1JyQxRjJnX1m62eZZTGWEFrkPu9QCx1YWZ\&quot;] -to [\&quot;1A1vwLMWoHei4pWz7aJQmWrpLdQ2HSeTod\&quot;] -amount [10]" />
       <kind value="PACKAGE" />
       <filePath value="$PROJECT_DIR$/main.go" />
       <package value="2021/_03_公链/XianFengChain04" />
@@ -106,76 +109,15 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Go Build.go build wallent.go" />
         <item itemvalue="Go Build.go build 2021/_03_公链/XianFengChain04" />
+        <item itemvalue="Go Build.go build wallent.go" />
         <item itemvalue="Go Build.go build main.go" />
         <item itemvalue="Go Build.go build client.go" />
       </list>
     </recent_temporary>
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="1" />
-  </component>
-  <component name="WindowStateProjectService">
-    <state x="447" y="46" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1615435488929">
-      <screen x="0" y="0" width="1536" height="864" />
-    </state>
-    <state x="447" y="46" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1536.864@0.0.1536.864" timestamp="1615435488929" />
-    <state x="702" y="299" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1614752177430">
-      <screen x="0" y="0" width="1536" height="864" />
-    </state>
-    <state x="702" y="299" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1536.864@0.0.1536.864" timestamp="1614752177430" />
-    <state x="879" y="156" key="#com.intellij.ide.util.MemberChooser" timestamp="1616639870136">
-      <screen x="0" y="0" width="1536" height="864" />
-    </state>
-    <state x="879" y="156" key="#com.intellij.ide.util.MemberChooser/0.0.1536.864@0.0.1536.864" timestamp="1616639870136" />
-    <state x="699" y="159" key="#go_build_2021/_03_公链/XianFengChain04" timestamp="1614752129950">
-      <screen x="0" y="0" width="1536" height="864" />
-    </state>
-    <state x="699" y="159" key="#go_build_2021/_03_公链/XianFengChain04/0.0.1536.864@0.0.1536.864" timestamp="1614752129950" />
-    <state x="806" y="49" key="#go_build_block.go" timestamp="1615517912481">
-      <screen x="0" y="0" width="1536" height="864" />
-    </state>
-    <state x="806" y="49" key="#go_build_block.go/0.0.1536.864@0.0.1536.864" timestamp="1615517912481" />
-    <state x="484" y="93" key="#go_build_client.go" timestamp="1615435400318">
-      <screen x="0" y="0" width="1536" height="864" />
-    </state>
-    <state x="484" y="93" key="#go_build_client.go/0.0.1536.864@0.0.1536.864" timestamp="1615435400318" />
-    <state x="788" y="97" key="#go_build_wallent.go" timestamp="1616722810015">
-      <screen x="0" y="0" width="1536" height="864" />
-    </state>
-    <state x="788" y="97" key="#go_build_wallent.go/0.0.1536.864@0.0.1536.864" timestamp="1616722810015" />
-    <state x="752" y="248" key="FileChooserDialogImpl" timestamp="1616076455740">
-      <screen x="0" y="0" width="1536" height="864" />
-    </state>
-    <state x="752" y="248" key="FileChooserDialogImpl/0.0.1536.864@0.0.1536.864" timestamp="1616076455740" />
-    <state width="1006" height="217" key="GridCell.Tab.0.bottom" timestamp="1616482925600">
-      <screen x="0" y="0" width="1536" height="864" />
-    </state>
-    <state width="1006" height="217" key="GridCell.Tab.0.bottom/0.0.1536.864@0.0.1536.864" timestamp="1616482925600" />
-    <state width="1006" height="217" key="GridCell.Tab.0.center" timestamp="1616482925599">
-      <screen x="0" y="0" width="1536" height="864" />
-    </state>
-    <state width="1006" height="217" key="GridCell.Tab.0.center/0.0.1536.864@0.0.1536.864" timestamp="1616482925599" />
-    <state width="1006" height="217" key="GridCell.Tab.0.left" timestamp="1616482925598">
-      <screen x="0" y="0" width="1536" height="864" />
-    </state>
-    <state width="1006" height="217" key="GridCell.Tab.0.left/0.0.1536.864@0.0.1536.864" timestamp="1616482925598" />
-    <state width="1006" height="217" key="GridCell.Tab.0.right" timestamp="1616482925599">
-      <screen x="0" y="0" width="1536" height="864" />
-    </state>
-    <state width="1006" height="217" key="GridCell.Tab.0.right/0.0.1536.864@0.0.1536.864" timestamp="1616482925599" />
-    <state x="544" y="80" key="SettingsEditor" timestamp="1616631955543">
-      <screen x="0" y="0" width="1536" height="864" />
-    </state>
-    <state x="544" y="80" key="SettingsEditor/0.0.1536.864@0.0.1536.864" timestamp="1616631955543" />
-    <state x="724" y="194" width="755" height="548" key="find.popup" timestamp="1614821283742">
-      <screen x="0" y="0" width="1536" height="864" />
-    </state>
-    <state x="724" y="194" width="755" height="548" key="find.popup/0.0.1536.864@0.0.1536.864" timestamp="1614821283742" />
-    <state x="930" y="186" width="672" height="678" key="search.everywhere.popup" timestamp="1616574589142">
-      <screen x="0" y="0" width="1536" height="864" />
-    </state>
-    <state x="930" y="186" width="672" height="678" key="search.everywhere.popup/0.0.1536.864@0.0.1536.864" timestamp="1616574589142" />
+    <option name="version" value="3" />
   </component>
 </project>

@@ -7,14 +7,14 @@ import (
 	"fmt"
 	"github.com/boltdb/bolt"
 	"math/big"
+	"strconv"
 )
 
 const BLOCKS = "blocks"
 const LASTHASH = "lasthash"
 
-/**
- * 定义区块链结构体，该结构体用于管理区块
- */
+
+//定义区块链结构体，该结构体用于管理区块
 type BlockChain struct {
 	//切片
 	//[block1,block2,block3]
@@ -27,7 +27,7 @@ type BlockChain struct {
 
 	Wallet *wallet.Wallet //引入钱包管理功能
 }
-
+//创建一条区块链
 func CreateChain(db *bolt.DB) (*BlockChain, error) {
 	var lastBlock Block
 	db.Update(func(tx *bolt.Tx) error {
@@ -56,9 +56,7 @@ func CreateChain(db *bolt.DB) (*BlockChain, error) {
 	}, nil
 }
 
-/**
- * 创建coinbase交易的方法
- */
+//创建coinbase交易的方法
 func (chain *BlockChain) CreateCoinBase(addr string) error {
 	//参数检查 : 对用户传递的地址进行有效性地址检查
 	isAddrValid := chain.Wallet.CheckAddress(addr)
@@ -78,9 +76,7 @@ func (chain *BlockChain) CreateCoinBase(addr string) error {
 	return err
 }
 
-/**
- * 创建一个区块链对象，包含一个创世区块
- */
+// 创建一个区块链对象，包含一个创世区块
 func (chain *BlockChain) CreateGensis(txs []transaction.Transaction) error {
 	hashBig := new(big.Int)
 	hashBig.SetBytes(chain.LastBlock.Hash[:])
@@ -121,9 +117,7 @@ func (chain *BlockChain) CreateGensis(txs []transaction.Transaction) error {
 	return err
 }
 
-/**
- * 生成一个新区块
- */
+//  生成一个新区块
 func (chain *BlockChain) CreateNewBlock(txs []transaction.Transaction) error {
 	//目的：生成一个新区块，并存到bolt.DB文件中去(持久化）
 	//手段（步骤）：
@@ -246,9 +240,8 @@ func (chain *BlockChain) Next() Block {
 	return iteratorBlock
 }
 
-/**
- * 该方法用于查询出指定地址的UTXOs集合并返回
- */
+//该方法用于查询出指定地址的UTXOs集合并返回
+
 func (chain *BlockChain) SearchUTXOsFromDB(addr string) []transaction.UTXO {
 
 	//花费记录的容器
@@ -285,7 +278,7 @@ func (chain *BlockChain) SearchUTXOsFromDB(addr string) []transaction.UTXO {
 	for _, come := range inCome {
 		isComeSpent = false
 		for _, spen := range spend {
-			if come.IsUTXOSpent(spen) {//该笔收入已被花费
+			if come.IsUTXOSpent(spen) { //该笔收入已被花费
 				isComeSpent = true
 				break
 			}
@@ -297,9 +290,7 @@ func (chain *BlockChain) SearchUTXOsFromDB(addr string) []transaction.UTXO {
 	return utxos
 }
 
-/**
- * 该方法用于实现地址余额的统计
- */
+// 该方法用于实现地址余额的统计
 func (chain *BlockChain) GetBalance(addr string) (float64, error) {
 	//检查地址的合法性
 	isAddrValid := chain.Wallet.CheckAddress(addr)
@@ -311,9 +302,7 @@ func (chain *BlockChain) GetBalance(addr string) (float64, error) {
 	return totalBalance, nil
 }
 
-/**
- * 该方法用于实现地址余额统计和地址所可以花费的utxo集合
- */
+// 该方法用于实现地址余额统计和地址所可以花费的utxo集合
 func (chain BlockChain) GetUTXOsWithBalance(addr string, txs []transaction.Transaction) ([]transaction.UTXO, float64) {
 	//1、遍历bolt.DB文件，找区块中的可用的utxo的集合
 	dbUtxos := chain.SearchUTXOsFromDB(addr)
@@ -324,7 +313,7 @@ func (chain BlockChain) GetUTXOsWithBalance(addr string, txs []transaction.Trans
 	for _, tx := range txs {
 		//a、遍历交易输入，把花出去的钱记录下来
 		for _, input := range tx.Inputs {
-			if input.VerifyInputWithAddress(addr) {// input 属于 addr
+			if input.VerifyInputWithAddress(addr) { // input 属于 addr
 				memSpends = append(memSpends, input)
 			}
 		}
@@ -340,7 +329,7 @@ func (chain BlockChain) GetUTXOsWithBalance(addr string, txs []transaction.Trans
 	utxos := make([]transaction.UTXO, 0)
 	var isUTXOSpend bool
 
-	for _, utxo := range dbUtxos {//遍历dbUTXO集合,看看内存中是否有已经花费了的
+	for _, utxo := range dbUtxos { //遍历dbUTXO集合,看看内存中是否有已经花费了的
 		isUTXOSpend = false
 
 		for _, spend := range memSpends {
@@ -415,13 +404,33 @@ func (chain *BlockChain) SendTransaction(froms []string, tos []string, amounts [
 			return err
 		}
 
-		//3.4.1 对签名验证,只有签名通过,才能将
-		err = newTx.SignTx(fromKeyPair.Priv,utxos[0:utxoNum+1])
+		//3.4.1 对交易进行,只有签名通过,才能将
+		err = newTx.SignTx(fromKeyPair.Priv, utxos[0:utxoNum+1])
 		if err != nil {
 			return err
 		}
+
 		//3.5新的交易 newTx 添加到 之前创建的 交易切片
 		newTxs = append(newTxs, *newTx)
+	}
+	//todo 对交易进行交易签名验证,只有所有签名验证通过,才能将交易打包生成新区块
+	//此处签名验证的逻辑和存储交易到新区块的逻辑理论上应该由其他节点完成
+	for _, tx := range newTxs {
+		// a.根据遍历到的tx交易,先找到当前tx使用了哪些utxo,即消费了哪些utxo
+		spentUTXO := chain.FindSpentUTXOsByTx(tx, newTxs)
+
+		for i,v :=range spentUTXO{
+			fmt.Printf("第 %d 张 的 UTXO的金额为 %f \n",i,v.Value)
+		}
+
+		verifyTx, err := tx.VerifyTx(spentUTXO)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		if !verifyTx {
+			return errors.New("验证结果" +strconv.FormatBool(verifyTx))
+
+		}
 	}
 
 	// 4. 创建区块,把交易切片扔进去
@@ -442,3 +451,57 @@ func (chain *BlockChain) GetNewAddress() (string, error) {
 func (chain *BlockChain) DumpPrivateKey(addr string) (*wallet.KeyPair, error) {
 	return chain.Wallet.DumpKeyPair(addr)
 }
+
+//寻找特定交易中 所花费的UTXO集合
+func (chain BlockChain) FindSpentUTXOsByTx(tran transaction.Transaction, memoryTxs []transaction.Transaction) []transaction.UTXO {
+	spendUTXOs := make([]transaction.UTXO, 0)
+	//迭代器,for range 遍历文件中每一个区块,拿到每一个区块中的每一个交易输出,记录下在该笔交易中被引用花费的输出
+	for chain.HasNext() {
+		block := chain.Next()
+		for _, tx := range block.Transactions {
+			for vout, output := range tx.Outputs {
+				utxo := transaction.UTXO{
+					TxId:     tx.TxHash,
+					Vout:     vout,
+					TxOutput: output,
+				}                                   //将交易输出制作成 utxo 方便判断是否被消费
+				for _, input := range tran.Inputs { //遍历交易池中的交易输入
+					if utxo.IsUTXOSpent(input) { //如果utxo在交易池中被引用消费,添加到切片中
+						spendUTXOs = append(spendUTXOs, utxo)
+					}
+				}
+			}
+		}
+	}
+
+	//for range 遍历文件中每一个区块,拿到每一个区块中的每一个交易输出,记录下在该笔交易中被引用花费的输出
+	for _, memTx := range memoryTxs {
+		for vout, output := range memTx.Outputs {
+			utxo := transaction.UTXO{
+				TxId:     memTx.TxHash,
+				Vout:     vout,
+				TxOutput: output,
+			} //将每一个交易输出制作成utxo,使用方法判断是否被引用消费了
+			for _, input := range tran.Inputs {
+				if utxo.IsUTXOSpent(input) { //如果已经被花费了,添加到切片中
+					spendUTXOs = append(spendUTXOs, utxo)
+				}
+			}
+		}
+	}
+	return spendUTXOs
+}
+/*
+//b.创建一个切片用于记录记录已经花费的utxos
+		//spentUTXO := make([]transaction.UTXO, 0)
+
+		//c.遍历tx的交易输入集合,找出已经用过的,添加到切片集合spentUTXO
+		for _, input := range tx.Inputs {
+			for _, utxo := range utxos {
+				if utxo.IsUTXOSpent(input) {
+					spentUTXO = append(spentUTXO, utxo)
+				}
+
+			}
+		}
+ */

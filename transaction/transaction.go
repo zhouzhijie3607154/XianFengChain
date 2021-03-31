@@ -3,9 +3,11 @@ package transaction
 import (
 	"2021/_03_公链/XianFengChain04/utils"
 	"crypto/ecdsa"
+	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/sha256"
 	"errors"
+	"fmt"
 )
 
 const REWARDSIZE = 50
@@ -104,44 +106,106 @@ func (tx *Transaction) SignTx(priv *ecdsa.PrivateKey, utxos []UTXO) (err error) 
 	txCopy := tx.CopyTx()
 
 	//在复制品中签名,签名的结果复制给原始 tx
-	for i := 0; i < len(txCopy.Inputs); i++ {
-		//1.遍历得到每一笔交易输入
-		input := txCopy.Inputs[i]
+	for index, _ := range txCopy.Inputs {
+		//1.将交易输入中的原始公钥赋值为 公钥hash
+		txCopy.Inputs[index].PubK = utxos[index].PubKHash
 
-		//2.遍历得到每一个 UTXO
-		utxo := utxos[i]
-
-		//3.将交易输入中的原始公钥赋值为 公钥hash
-		input.PubK = utxo.PubKHash
-
-		//4.计算交易的哈希值 txHash
+		//2.计算交易的哈希值 txHash
 		txHash, err := txCopy.CalculateTxHash()
 		if err != nil {
 			return err
 		}
-		//5.使用私钥对得到的txHash进行签名
+		fmt.Printf("签名时的交易hash数据: %x\n ", txHash)
+
+		//3.使用私钥对得到的txHash进行签名
 		r, s, err := ecdsa.Sign(rand.Reader, priv, txHash)
-		if err !=nil {
+		if err != nil {
 			return err
 		}
-		//6.对原始交易中的  input中的Sig字段进行赋值
-		tx.Inputs[i].Sig = append(r.Bytes(),s.Bytes()...)
 
-		//7.最后清空 交易输入中的 原始公钥
-		input.PubK = nil
+		//4.对原始交易中的  input中的Sig字段进行赋值
+		tx.Inputs[index].Sig = append(r.Bytes(), s.Bytes()...)
+
+		//5.最后清空 交易输入中的 原始公钥
+		txCopy.Inputs[index].PubK = nil
 	}
 	return nil
 }
 
-//拷贝交易对象实例
-func (tx Transaction) CopyTx() Transaction {
-	copyTransaction := tx
-	return copyTransaction
+//交易的签名验证方法,该方法返回一个布尔值,ture为验证通过,否则签名不通过
+func (tx *Transaction) VerifyTx(utxos []UTXO) (bool, error) {
+	if len(tx.Inputs) != len(utxos) {
+		return false, errors.New("txInputs length should equal utxos length")
+	}
+	// 验签 : 需要 公钥 签名结果 原始数据 -->  ecdsa.Verify 函数调用
+	//已有的 公钥 : tx.Input[i].PubK
+	//   签名数据 : tx.Input[i].Sig
+	//签名时是对 整个交易数据进行签名 ,sign字段也在交易中
+	txCopy := tx.CopyTx()
+	for index, _ := range txCopy.Inputs {
+
+		//a. 清空 签名结果
+		txCopy.Inputs[index].Sig = nil
+
+		//b. 副本数据改回签名前的状态
+		txCopy.Inputs[index].PubK = utxos[index].PubKHash
+
+		//对副本数据 计算 改造后的交易 hash
+		txHash, err := txCopy.CalculateTxHash()
+		if err != nil {
+			return false, err
+		}
+
+		//调用 api进行签名验证
+		//公钥格式转换 : []byte --> PublicKey
+		pubKey := utils.PubBytesToEcdsaPubKey(elliptic.P256(), tx.Inputs[index].PubK)
+
+		//签名结果 : []byte -- > r,s *big.Int
+		r, s := utils.SignBytesToSignature(tx.Inputs[index].Sig)
+		fmt.Printf("验签时的交易hash数据: %x\n ", txHash)
+
+		//签名验证
+		isVerify := ecdsa.Verify(pubKey, txHash, r, s)
+
+		if !isVerify {
+			return false, errors.New("签名验证失败..")
+		}
+	}
+	return true, nil
 }
 
+//拷贝交易对象实例
+func (tx Transaction) CopyTx() Transaction {
+	inputs := make([]TxInput, 0)
+	for _, input := range tx.Inputs {
+		txIn := TxInput{
+			TxId: input.TxId,
+			Vout: input.Vout,
+			PubK: input.PubK,
+			Sig:  input.Sig,
+		}
+		inputs = append(inputs, txIn)
+	}
+
+	outputs := make([]TxOutput, 0)
+	for _, output := range tx.Outputs {
+		txOut := TxOutput{
+			Value:    output.Value,
+			PubKHash: output.PubKHash,
+		}
+		outputs = append(outputs, txOut)
+	}
+	hash := tx.TxHash
+
+	return Transaction{
+		TxHash:  hash,
+		Inputs:  inputs,
+		Outputs: outputs,
+	}
+}
 
 //计算交易的哈希值
-func (tx *Transaction)CalculateTxHash()([]byte,error)  {
+func (tx *Transaction) CalculateTxHash() ([]byte, error) {
 	txBytes, err := utils.Encode(tx)
-	return utils.Hash256(txBytes),err
+	return utils.Hash256(txBytes), err
 }

@@ -2,11 +2,14 @@ package utils
 
 import (
 	"bytes"
+	"crypto/ecdsa"
+	"crypto/elliptic"
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/gob"
 	"encoding/json"
 	"golang.org/x/crypto/ripemd160"
+	"math/big"
 )
 
 /**
@@ -16,6 +19,24 @@ func Int2Byte(num int64) ([]byte, error) {
 	buff := new(bytes.Buffer)
 	err := binary.Write(buff, binary.BigEndian, num)
 	return buff.Bytes(), err
+}
+
+/**
+  * 公钥字节切片转换为结构体
+ */
+func PubBytesToEcdsaPubKey(curve elliptic.Curve,pubKeyBytes[]byte)*ecdsa.PublicKey {
+	x, y := elliptic.Unmarshal(elliptic.P256(), pubKeyBytes)
+	return &ecdsa.PublicKey{
+		elliptic.P256(),
+		x, y,
+	}
+}
+func SignBytesToSignature(signBytes []byte) (r,s *big.Int) {
+	rBytes := signBytes[:len(signBytes)/2]
+	sBytes := signBytes[len(signBytes)/2:]
+	r = new(big.Int).SetBytes(rBytes)
+	s = new(big.Int).SetBytes(sBytes)
+	return r,s
 }
 
 /**

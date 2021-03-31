@@ -17,6 +17,7 @@ func main() {
 		return
 	}
 
+
 	defer db.Close() //xxx.db.lock
 	//创建一条区块链
 	blockChain ,err:= chain.CreateChain(db)
