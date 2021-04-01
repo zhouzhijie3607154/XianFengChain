@@ -416,12 +416,9 @@ func (chain *BlockChain) SendTransaction(froms []string, tos []string, amounts [
 	//todo 对交易进行交易签名验证,只有所有签名验证通过,才能将交易打包生成新区块
 	//此处签名验证的逻辑和存储交易到新区块的逻辑理论上应该由其他节点完成
 	for _, tx := range newTxs {
+		fmt.Printf("内存中已有的tx为: %x\n",tx.Inputs)
 		// a.根据遍历到的tx交易,先找到当前tx使用了哪些utxo,即消费了哪些utxo
 		spentUTXO := chain.FindSpentUTXOsByTx(tx, newTxs)
-
-		for i,v :=range spentUTXO{
-			fmt.Printf("第 %d 张 的 UTXO的金额为 %f \n",i,v.Value)
-		}
 
 		verifyTx, err := tx.VerifyTx(spentUTXO)
 		if err != nil {
@@ -432,7 +429,6 @@ func (chain *BlockChain) SendTransaction(froms []string, tos []string, amounts [
 
 		}
 	}
-
 	// 4. 创建区块,把交易切片扔进去
 	err := chain.CreateNewBlock(newTxs)
 	if err != nil {

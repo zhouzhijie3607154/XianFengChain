@@ -4,11 +4,8 @@
     <list default="true" id="83f81a4e-b8e3-4317-8d61-55513b2fbaf8" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chain/blockchain.go" beforeDir="false" afterPath="$PROJECT_DIR$/chain/blockchain.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/transaction/transaction.go" beforeDir="false" afterPath="$PROJECT_DIR$/transaction/transaction.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/convert.go" beforeDir="false" afterPath="$PROJECT_DIR$/utils/convert.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/xianfengchain04.db" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/公链开发文档" beforeDir="false" afterPath="$PROJECT_DIR$/公链开发文档" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -68,7 +65,7 @@
     <configuration name="go build 2021/_03_公链/XianFengChain04" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="XianFengChain04" />
       <working_directory value="$PROJECT_DIR$" />
-      <parameters value="sendtransaction -from [\&quot;1JyQxRjJnX1m62eZZTGWEFrkPu9QCx1YWZ\&quot;] -to [\&quot;1A1vwLMWoHei4pWz7aJQmWrpLdQ2HSeTod\&quot;] -amount [10]" />
+      <parameters value="sendtransaction -from [\&quot;1HJUwyjm3qmJwDy6ZpWwqeE16jYYGsxiUB\&quot;] -to [\&quot;1DqptP6hfVdLvrcixTGndC9C73ZgHbEvuE\&quot;] -amount [10]" />
       <kind value="PACKAGE" />
       <filePath value="$PROJECT_DIR$/main.go" />
       <package value="2021/_03_公链/XianFengChain04" />

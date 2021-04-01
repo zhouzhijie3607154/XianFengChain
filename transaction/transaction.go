@@ -128,12 +128,15 @@ func (tx *Transaction) SignTx(priv *ecdsa.PrivateKey, utxos []UTXO) (err error) 
 
 		//5.最后清空 交易输入中的 原始公钥
 		txCopy.Inputs[index].PubK = nil
+		fmt.Printf("签名后的PubK信息: %x\n ", tx.Inputs[index].PubK)
+
 	}
 	return nil
 }
 
 //交易的签名验证方法,该方法返回一个布尔值,ture为验证通过,否则签名不通过
 func (tx *Transaction) VerifyTx(utxos []UTXO) (bool, error) {
+
 	if len(tx.Inputs) != len(utxos) {
 		return false, errors.New("txInputs length should equal utxos length")
 	}
@@ -162,7 +165,6 @@ func (tx *Transaction) VerifyTx(utxos []UTXO) (bool, error) {
 
 		//签名结果 : []byte -- > r,s *big.Int
 		r, s := utils.SignBytesToSignature(tx.Inputs[index].Sig)
-		fmt.Printf("验签时的交易hash数据: %x\n ", txHash)
 
 		//签名验证
 		isVerify := ecdsa.Verify(pubKey, txHash, r, s)
@@ -176,7 +178,7 @@ func (tx *Transaction) VerifyTx(utxos []UTXO) (bool, error) {
 
 //拷贝交易对象实例
 func (tx Transaction) CopyTx() Transaction {
-	inputs := make([]TxInput, 0)
+/*	inputs := make([]TxInput, 0)
 	for _, input := range tx.Inputs {
 		txIn := TxInput{
 			TxId: input.TxId,
@@ -199,6 +201,17 @@ func (tx Transaction) CopyTx() Transaction {
 
 	return Transaction{
 		TxHash:  hash,
+		Inputs:  inputs,
+		Outputs: outputs,
+	}
+
+ */
+	outputs := make([]TxOutput,0)
+	inputs := make([]TxInput,0)
+	copy(tx.Outputs,outputs)
+	copy(tx.Inputs,inputs)
+	return  Transaction{
+		TxHash:  tx.TxHash,
 		Inputs:  inputs,
 		Outputs: outputs,
 	}
