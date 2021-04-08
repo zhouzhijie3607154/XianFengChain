@@ -322,4 +322,40 @@ go run main.go sendtransaction -from [\"13mLgGrTHNBAMtGoq5ke1JUPq4ykUfRygR\"] -t
 
 
 	签名后交易对象的Sig字段修改,与原数据签名时的值已经不一致了
-	验签 ? 需要把修改后的字段
+	验签 ? 需要把修改后的字段gai
+
+
+
+2021年4月2日09:02:57:
+
+bug : gob -> []byte -->sha256 --> TxHash
+已修复 --> transaction结构体中新增一个变量 timeStamp
+	防止coinbase交易 txHash一致
+
+
+2021年4月6日08:41:54
+
+1.UTXOSet概念:
+    比特币只会在比特币网络通过交易转账的方式中流转,而不会消失.
+
+    交易输出会散落某个区块的某个交易中,
+    如果要使用UTXO时,由于不知道输出具体在哪个区块的哪个交易中
+    我们需要把所有的交易记录全部遍历一遍.
+     效率低,资源浪费(区块会越来越多,交易也会越来越多,越到后面越浪费算力)
+
+优化思路: 在每一次比特币网络发生交易时,都将产生的UTXOs单独存放在一个地方(UTXOSet)
+            要用到的时候只要直接去UTXOSet找就好了
+     map[address] []UTXO
+
+     编码实现 : 数据结构
+     type UTXOSet struct{
+        UTXOs map[string] []byte
+     }
+     增 删 查
+
+
+    集成:
+    QueryUTXOsByAddr    : 发送交易前查询
+    AddUTXOsWithAddress : 发送交易
+    DeleteUTXOsWithAddr
+

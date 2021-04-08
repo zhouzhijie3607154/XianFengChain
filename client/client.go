@@ -43,6 +43,12 @@ func (cmd *CmdClient) Run() {
 		cmd.GetNewAddress()
 	case GETALLADDRESS: //查询所有地址的功能
 		cmd.GetAllAddress()
+
+	case SETCOINBASE:	//设置奖励地址
+		cmd.SetCoinBase()
+	case GETCOINBASE:	//获取奖励地址
+		cmd.GetCoinBase()
+
 	case DUMPPRIKEY:
 		cmd.DumpPrivateKey() //导出特定地址的私钥文件
 	case HELP:
@@ -117,9 +123,7 @@ func (cmd *CmdClient) GetLastBlock() {
 	}
 }
 
-/**
- * 用户发起交易
- */
+//发起交易
 func (cmd *CmdClient) SendTransaction() {
 	//-data
 	createBlock := flag.NewFlagSet(SENDTRANSACTION, flag.ExitOnError)
@@ -210,16 +214,16 @@ func (cmd *CmdClient) GenerateGensis() {
 	generategensis.StringVar(&addr, "address", "", "用户指定的矿工的地址")
 	generategensis.Parse(os.Args[2:])
 
-	blockChain := cmd.Chain
+
 	//1、先判断该blockchain中是否已存在创世区块
 	hashBig := new(big.Int)
-	hashBig.SetBytes(blockChain.LastBlock.Hash[:])
+	hashBig.SetBytes( cmd.Chain.LastBlock.Hash[:])
 	if hashBig.Cmp(big.NewInt(0)) == 1 {
 		fmt.Println("创世区块已存在，不能重复生成创世区块")
 		return
 	}
 
-	err := blockChain.CreateCoinBase(addr)
+	err := cmd.Chain.CreateCoinBase(addr)
 	if err != nil {
 		fmt.Println("抱歉，创建coinbase交易失败，遇到错误：", err.Error())
 		return
@@ -227,9 +231,7 @@ func (cmd *CmdClient) GenerateGensis() {
 	fmt.Println("恭喜！生成了一笔COINBASE交易，奖励已到账。")
 }
 
-/**
- * 该方法用于打印输出项目的使用和说明信息，相当于项目的帮助文档和说明书
- */
+//该方法用于打印输出项目的使用和说明信息，相当于项目的帮助文档和说明书
 func (cmd *CmdClient) Help() {
 	fmt.Println("------------Welcome to XianfengChain04 Project-----------")
 	fmt.Println("XianfengChain04 is a custom blockchain project, the project plan to build a very simple public chain.")
@@ -290,4 +292,36 @@ func (cmd *CmdClient) DumpPrivateKey() {
 		return
 	}
 	fmt.Println("该地址的私钥为:", hex.EncodeToString(keyPair.Priv.D.Bytes()))
+}
+
+func (cmd CmdClient)SetCoinBase()  {
+	setCoinbase := flag.NewFlagSet(SETCOINBASE,flag.ExitOnError)
+	address := setCoinbase.String("address" ,"","用户自定义的奖励地址")
+	setCoinbase.Parse(os.Args[2:])
+	if len(os.Args[2:]) > 2 {
+		fmt.Println(os.Args)
+		fmt.Println("参数错误,请检查后重试   help 查看更多帮助信息")
+		return
+	}
+	err := cmd.Chain.SetCoinBase(*address)
+	if err != nil {
+		fmt.Println("设置奖励地址失败,请重试!",err.Error())
+		return
+	}
+	fmt.Println("成功设置奖励地址: ",*address)
+}
+
+func (cmd *CmdClient) GetCoinBase() {
+	getCoinbase := flag.NewFlagSet(SETCOINBASE,flag.ExitOnError)
+	getCoinbase.Parse(os.Args[2:])
+	if len(os.Args) > 2 {
+		fmt.Println("参数错误,请检查后重试   help 查看更多帮助信息")
+		return
+	}
+	addr := cmd.Chain.GetCoinBase()
+	if len(addr) <= 0 {
+		fmt.Println("抱歉,查询coinbase奖励地址失败,请检查后重试")
+		return
+	}
+	fmt.Printf("当前的区块奖励地址为: %v\n " ,addr)
 }

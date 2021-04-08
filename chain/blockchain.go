@@ -2,6 +2,7 @@ package chain
 
 import (
 	"2021/_03_公链/XianFengChain04/transaction"
+	"2021/_03_公链/XianFengChain04/utxoset"
 	"2021/_03_公链/XianFengChain04/wallet"
 	"errors"
 	"fmt"
@@ -10,9 +11,11 @@ import (
 	"strconv"
 )
 
+//桶名
 const BLOCKS = "blocks"
-const LASTHASH = "lasthash"
 
+//键名
+const LASTHASH = "lasthash" //最新区块hash
 
 //定义区块链结构体，该结构体用于管理区块
 type BlockChain struct {
@@ -26,7 +29,10 @@ type BlockChain struct {
 	IteratorBlockHash [32]byte //表示当前迭代到了那个区块，该变量用于记录迭代到的区块hash
 
 	Wallet *wallet.Wallet //引入钱包管理功能
+
+	UTXOSet utxoset.UTXOSet //引入 UTXO集合
 }
+
 //创建一条区块链
 func CreateChain(db *bolt.DB) (*BlockChain, error) {
 	var lastBlock Block
@@ -70,14 +76,33 @@ func (chain *BlockChain) CreateCoinBase(addr string) error {
 		return err
 	}
 
-	//2、把coinbase交易存到区块中
-	err = chain.CreateGensis([]transaction.Transaction{*coinbase})
+	//2.设置奖励地址为 addr
+	err = chain.SetCoinBase(addr)
+	if err != nil {
+		return err
+	}
 
+	//3、把coinbase交易存到区块中
+	err = chain.CreateGenesis([]transaction.Transaction{*coinbase})
+	if err != nil {
+		return err
+	}
+
+	// 把coinbase交易产生的交易输出保存到UTXOSet中
+	utxos := make([]transaction.UTXO, 0)
+
+	utxo := transaction.NewUTXO(coinbase.TxHash, 0, coinbase.Outputs[0])
+	utxos = append(utxos, utxo)
+
+	success, err := chain.UTXOSet.AddUTXOsWithAddr(addr, utxos)
+	if !success {
+		fmt.Println("添加 UTXO失败,err: ", err.Error())
+	}
 	return err
 }
 
 // 创建一个区块链对象，包含一个创世区块
-func (chain *BlockChain) CreateGensis(txs []transaction.Transaction) error {
+func (chain *BlockChain) CreateGenesis(txs []transaction.Transaction) error {
 	hashBig := new(big.Int)
 	hashBig.SetBytes(chain.LastBlock.Hash[:])
 	//最新区块hash有值，则说明区块文件中创世区块已经存在了
@@ -102,12 +127,15 @@ func (chain *BlockChain) CreateGensis(txs []transaction.Transaction) error {
 		if len(lastHash) == 0 { //第一次
 			gensis := CreateGenesis(txs)
 			genSerBytes, _ := gensis.Serialize()
+
 			//bucket已经存在
 			// key -> value
 			// blockHash -> 区块序列化以后的数据
 			bucket.Put(gensis.Hash[:], genSerBytes) //把创世区块保存到boltdb中去
+
 			//使用一个标志，用来记录最新区块的hash，以标明当前文件中存储到了最新的哪个区块
 			bucket.Put([]byte(LASTHASH), gensis.Hash[:])
+
 			//把geneis赋值给chain的lastblock
 			chain.LastBlock = gensis
 			chain.IteratorBlockHash = gensis.Hash
@@ -299,6 +327,10 @@ func (chain *BlockChain) GetBalance(addr string) (float64, error) {
 	}
 
 	_, totalBalance := chain.GetUTXOsWithBalance(addr, []transaction.Transaction{})
+
+	//for i,v := range utxos{
+	//	fmt.Printf("第 %d 张 UTXO的 金额 为 %f\n",i,v.Value)
+	//}
 	return totalBalance, nil
 }
 
@@ -385,6 +417,7 @@ func (chain *BlockChain) SendTransaction(froms []string, tos []string, amounts [
 		totalBalance = 0
 		var utxoNum int
 		for index, utxo := range utxos {
+			fmt.Printf("交易发起者需要用的 第 %d 张 utxo %f\n", index, utxo.Value)
 			totalBalance += utxo.Value
 			if totalBalance > amounts[from_index] {
 				utxoNum = index
@@ -409,14 +442,18 @@ func (chain *BlockChain) SendTransaction(froms []string, tos []string, amounts [
 		if err != nil {
 			return err
 		}
-
 		//3.5新的交易 newTx 添加到 之前创建的 交易切片
 		newTxs = append(newTxs, *newTx)
+
 	}
-	//todo 对交易进行交易签名验证,只有所有签名验证通过,才能将交易打包生成新区块
+
+	// 对交易进行交易签名验证,只有所有签名验证通过,才能将交易打包生成新区块
 	//此处签名验证的逻辑和存储交易到新区块的逻辑理论上应该由其他节点完成
 	for _, tx := range newTxs {
-		fmt.Printf("内存中已有的tx为: %x\n",tx.Inputs)
+		if tx.IsCoinBase() {
+			continue
+		}
+		//fmt.Printf("内存中已有的tx输出为: %x\n", tx.Outputs)
 		// a.根据遍历到的tx交易,先找到当前tx使用了哪些utxo,即消费了哪些utxo
 		spentUTXO := chain.FindSpentUTXOsByTx(tx, newTxs)
 
@@ -425,16 +462,103 @@ func (chain *BlockChain) SendTransaction(froms []string, tos []string, amounts [
 			fmt.Println(err.Error())
 		}
 		if !verifyTx {
-			return errors.New("验证结果" +strconv.FormatBool(verifyTx))
+			return errors.New("验证结果 : " + strconv.FormatBool(verifyTx))
 
 		}
 	}
+
+	//把coinbase交易放到第一笔交易的位置
+	coinBaseAddr := chain.Wallet.GetCoinBase()
+
+	//coinbase, err := transaction.CreateCoinBase(chain.Wallet.GetCoinBase())
+	coinbase, err := transaction.CreateCoinBase(coinBaseAddr) //第三方的地址时有效 交易发送接收者地址无效
+
+	if err != nil {
+		return err
+	}
+	txall := make([]transaction.Transaction, 0)
+	txall = append(txall, *coinbase)
+	txall = append(txall, newTxs...)
+
 	// 4. 创建区块,把交易切片扔进去
-	err := chain.CreateNewBlock(newTxs)
+	err = chain.CreateNewBlock(txall)
 	if err != nil {
 		return err
 	}
 
+	/*该处应该由其他节点完成
+	遍历所有交易,交易输入从utxoset删除,交易输出添加到utxoset中*/
+	//用于存放地址的未花费的交易输出的容器
+	utxoSet := make(map[string][]transaction.UTXO)
+
+	//用于存放地址的已消费的交易输入的容器
+	spendRecordSet := make(map[string][]utxoset.SpendRecord)
+
+	for txIndex, tx := range txall {
+		//将内存交易池中所有地址新产生的 UTXO 添加到 UTXOSet
+		for vout, output := range tx.Outputs {
+			utxo := transaction.NewUTXO(tx.TxHash, vout, output)
+			isSpent := false
+
+			//遍历后面的所有交易,如果被花费了,标记一下
+			for i := txIndex + 1; i < len(txall); i++ {
+				for _, input := range txall[i].Inputs {
+					if utxo.IsUTXOSpent(input) {
+						isSpent = true
+					}
+				}
+			}
+			//如果没被消费,把这个utxo追加到 该地址的UTXO切片中
+			if !isSpent {
+				address := wallet.GetAddressByPubKHash(utxo.PubKHash)
+				utxos := utxoSet[address]
+				if len(utxos) == 0 {
+					utxos = make([]transaction.UTXO, 0)
+				}
+				utxos = append(utxos, utxo)
+
+				utxoSet[address] = utxos
+			}
+		}
+
+		//将内存交易池中所有地址新花费的UTXO 添加到 spendRecordSet
+		for _, input := range tx.Inputs {
+			//spendRecord 用于记录一笔地址的消费
+			spendRecord := utxoset.NewSpendRecord(input.TxId, input.Vout)
+
+			address := wallet.GetAddressByPubK(input.PubK)
+			//获取某个地址的消费统计结果
+			spendRecords := spendRecordSet[address]
+			if len(spendRecords) == 0 {
+				spendRecords = make([]utxoset.SpendRecord, 0)
+			}
+			spendRecords = append(spendRecords, spendRecord)
+			spendRecordSet[address] = spendRecords
+		}
+	}
+
+	//遍历utxoSet,交易输出添加到utxoSet中
+	for address, utxos := range utxoSet {
+		success, err := chain.UTXOSet.AddUTXOsWithAddr(address, utxos)
+		if err != nil {
+			return err
+		}
+		if !success {
+			return errors.New("Add Unspent Transaction Output 数据遇到错误")
+		}
+	}
+
+	//遍历spendRecordSet,交易输入从utxoSet中删除
+	for address,records := range spendRecordSet{
+
+		success, err := chain.UTXOSet.DeleteUTXOsWithAddr(address, records)
+		if err != nil {
+			return err
+		}
+		if !success {
+			return errors.New("删除 已经消费的 交易输出 失败 !")
+		}
+	}
 	return nil
 }
 
@@ -470,7 +594,7 @@ func (chain BlockChain) FindSpentUTXOsByTx(tran transaction.Transaction, memoryT
 		}
 	}
 
-	//for range 遍历文件中每一个区块,拿到每一个区块中的每一个交易输出,记录下在该笔交易中被引用花费的输出
+	//for range 遍历交易池中每一个区块,拿到每一个区块中的每一个交易输出,记录下在该笔交易中被引用花费的输出
 	for _, memTx := range memoryTxs {
 		for vout, output := range memTx.Outputs {
 			utxo := transaction.UTXO{
@@ -487,6 +611,17 @@ func (chain BlockChain) FindSpentUTXOsByTx(tran transaction.Transaction, memoryT
 	}
 	return spendUTXOs
 }
+
+//设置奖励到账的地址
+func (chain *BlockChain) SetCoinBase(addr string) (err error) {
+	return chain.Wallet.SetCoinBase(addr)
+}
+
+//查询区块奖励地址
+func (chain *BlockChain) GetCoinBase() (addr string) {
+	return chain.Wallet.GetCoinBase()
+}
+
 /*
 //b.创建一个切片用于记录记录已经花费的utxos
 		//spentUTXO := make([]transaction.UTXO, 0)
@@ -500,4 +635,4 @@ func (chain BlockChain) FindSpentUTXOsByTx(tran transaction.Transaction, memoryT
 
 			}
 		}
- */
+*/

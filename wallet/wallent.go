@@ -4,13 +4,11 @@ import (
 	"2021/_03_公链/XianFengChain04/utils"
 	"bytes"
 	"crypto/elliptic"
-	"crypto/sha256"
 	"encoding/gob"
 	"errors"
 	"fmt"
 	"github.com/boltdb/bolt"
 	"github.com/mr-tron/base58"
-	"golang.org/x/crypto/ripemd160"
 )
 
 /**用于
@@ -30,11 +28,13 @@ var KEYSTORE = "KeyStore"
 //存地址的 Key
 var ADDRESSS_KEY = "addressKey"
 
+//存coinbase奖励的地址
+const COINBASE = "coinbase"
+
 //比特币地址版本号
 var VERSION = []byte{0x00}
-/**
-  新生成一个比特币的地址,
-*/
+
+//新生成一个比特币的地址,
 func (wallet *Wallet) NewAddress() (string, error) {
 	// 1~2.生成一对密钥对
 	keyPair, err := NewKeyPair()
@@ -42,27 +42,11 @@ func (wallet *Wallet) NewAddress() (string, error) {
 		return "", err
 	}
 
-	//3、对公钥进行sha256哈希
-	pubHash := sha256.Sum256(keyPair.Pub)
-	//4、reipemd160 计算
-	ripe := ripemd160.New()
-	ripe.Write(pubHash[:])
-	ripemdPub := ripe.Sum(nil)
-	//5、追加版本号
-	versionPub := append(VERSION, ripemdPub...)
+	//3~5对公钥进行sha256哈希 ripemd160哈希 添加版本号
+	versionPub := GetVersionPubByPubK(keyPair.Pub)
 
-	//6、两次哈希
-	firstHash := utils.Hash256(versionPub)
-	secondHash := utils.Hash256(firstHash)
-
-	//7.截取前四个字节作为地址校验位
-	check := secondHash[:4]
-
-	//8.拼接到versionPub后面
-	originAddress := append(versionPub, check...)
-
-	//9.base58编码
-	address := base58.Encode(originAddress)
+	//6~9.双哈希取校验位后拼接  base58编码
+	address := GetAddressByPubKHash(versionPub)
 
 	//10.生成的新地址添加到钱包中
 	wallet.Address[address] = keyPair
@@ -99,9 +83,7 @@ func (wallet *Wallet) CheckAddress(addr string) bool {
 	return false
 }
 
-/*
-钱包中的地址持久化到DB文件中
-*/
+//钱包中的地址持久化到DB文件中
 func (wallet *Wallet) SaveAddressToDB() error {
 	var err error
 	err = wallet.Engine.Update(func(tx *bolt.Tx) error {
@@ -130,9 +112,7 @@ func (wallet *Wallet) SaveAddressToDB() error {
 	return err
 }
 
-/*
-加载DB文件中的所有钱包地址
-*/
+// 加载DB文件中的所有钱包地址
 func LoadAddressFromDB(db *bolt.DB) (*Wallet, error) {
 	var err error
 	var address = make(map[string]*KeyPair)
@@ -168,9 +148,7 @@ func LoadAddressFromDB(db *bolt.DB) (*Wallet, error) {
 	}, nil
 }
 
-/**
-查询钱包中的所有地址
-*/
+//查询钱包中的所有地址
 func (wallet *Wallet) GetAddressList() []string {
 	addressList := make([]string, 0)
 
@@ -180,32 +158,98 @@ func (wallet *Wallet) GetAddressList() []string {
 	return addressList
 }
 
-/*
-给定一个地址,返回其对应的密钥对
-*/
+//给定一个地址,返回其对应的密钥对
 func (wallet *Wallet) DumpKeyPair(addr string) (*KeyPair, error) {
 	//1.地址合法性检查
 	isValid := wallet.CheckAddress(addr)
 	if !isValid {
-		return  nil,errors.New("地址格式错误,请检查后重试!")
+		return nil, errors.New("地址格式错误,请检查后重试!")
 	}
 
 	//2.钱包非空检查
 	if wallet.Address == nil {
-		return nil,errors.New("当前钱包地址为 空  ,查询失败!")
+		return nil, errors.New("当前钱包地址为 空  ,查询失败!")
 	}
 
 	//3.查询地址的私钥
 	keyPari := wallet.Address[addr]
 	if keyPari == nil {
-		return nil,errors.New("当前钱包未找到对应地址的私钥")
+		return nil, errors.New("当前钱包未找到对应地址的私钥")
 	}
-	return keyPari,nil
+	return keyPari, nil
 }
 
 //获取地址对应的密钥对
-func (wallet *Wallet) GetKeyPairByAddr(addr string) (*KeyPair) {
+func (wallet *Wallet) GetKeyPairByAddr(addr string) *KeyPair {
 	return wallet.Address[addr]
+}
+
+//设置coinbase交易的奖励地址
+func (wallet *Wallet) SetCoinBase(addr string) (err error) {
+	//1.地址合法性检查
+	if !wallet.CheckAddress(addr) {
+		return errors.New("地址格式错误,请检查后重试")
+	}
+	//2.设置addr 为 奖励地址
+	err = wallet.Engine.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(KEYSTORE))
+		if bucket == nil {
+			bucket, err = tx.CreateBucket([]byte(KEYSTORE))
+		}
+		err = bucket.Put([]byte(COINBASE), []byte(addr))
+		return err
+	})
+	return err
+}
+
+//获取 Coinbase奖励地址
+func (wallet *Wallet) GetCoinBase() (addr string) {
+	wallet.Engine.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(KEYSTORE))
+		if bucket == nil {
+			bucket, _ = tx.CreateBucket([]byte(KEYSTORE))
+		}
+		addr = string(bucket.Get([]byte(COINBASE)))
+
+		return nil
+	})
+	return addr
+}
+
+//通过原始公钥变换计算出 versionPub
+func  GetVersionPubByPubK(pubk []byte) (versionPub []byte) {
+	hash256 := utils.Hash256(pubk)
+	ripemd160 := utils.HashRipemd160(hash256)
+	versionPub = append(VERSION, ripemd160...)
+	return versionPub
+}
+
+//通过 添加了版本号的公钥hash 变换计算得出地址
+func GetAddressByPubKHash(data []byte) (address string) {
+	//6、两次哈希
+	firstHash := utils.Hash256(data)
+	secondHash := utils.Hash256(firstHash)
+
+	//7.截取前四个字节作为地址校验位
+	check := secondHash[:4]
+
+	//8.拼接到versionPub后面
+	originAddress := append(data, check...)
+
+	//9.base58编码
+	address = base58.Encode(originAddress)
+
+	return address
+}
+
+func GetAddressByPubK(pubK []byte)(address string)  {
+	//3~5对公钥进行sha256哈希 ripemd160哈希 添加版本号
+	versionPub := GetVersionPubByPubK(pubK)
+
+	//6~9.双哈希取校验位后拼接  base58编码
+	address = GetAddressByPubKHash(versionPub)
+
+	return address
 }
 
 /** 存储所有地址到DB文件时  map中的address值太离散了, 不放便取值 (Address) ,改为 map 直接序列化 : gob注册接口 Curve

@@ -8,31 +8,30 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
+	"time"
 )
 
 const REWARDSIZE = 50
 
-/**
- * 定义交易的结构体
- */
+//定义交易的结构体
 type Transaction struct {
 	//交易哈希
 	TxHash [32]byte
 	//交易输入
 	Inputs []TxInput
 	//交易输出
-	Outputs []TxOutput
+	Outputs    []TxOutput
+	LockedTime int64 //时间戳,确保生成的交易的hash值唯一
 }
 
-/**
- * 该函数用于定义一个coinbase交易，并返回该交易结构体
- */
+//该函数用于定义一个coinbase交易，并返回该交易结构体
 func CreateCoinBase(addr string) (*Transaction, error) {
 	//1.由系统一笔交易输出
 	output0 := NewTxOutput(REWARDSIZE, addr)
 	//2.系统生成 一笔 coinbase 交易
 	coinbase := Transaction{
-		Outputs: []TxOutput{*output0},
+		Outputs:    []TxOutput{*output0},
+		LockedTime: time.Now().Unix(),
 	}
 
 	//3.对coinbase交易进行 gob 序列化,生成交易 Id 并赋值
@@ -45,10 +44,7 @@ func CreateCoinBase(addr string) (*Transaction, error) {
 	return &coinbase, nil
 }
 
-/**
- * 该函数用于构建一笔普通的交易，返回构建好的交易实例
-
- */
+//该函数用于构建一笔普通的交易，返回构建好的交易实例
 func CreateNewTransaction(utxos []UTXO, from, to string, pubk []byte, amount float64) (*Transaction, error) {
 
 	//1、构建inputs
@@ -79,8 +75,9 @@ func CreateNewTransaction(utxos []UTXO, from, to string, pubk []byte, amount flo
 
 	//3、构建transaction
 	newTransaction := Transaction{
-		Inputs:  inputs,
-		Outputs: outputs,
+		Inputs:     inputs,
+		Outputs:    outputs,
+		LockedTime: time.Now().Unix(),
 	}
 
 	//4、计算transaction的哈希,并赋值
@@ -93,10 +90,13 @@ func CreateNewTransaction(utxos []UTXO, from, to string, pubk []byte, amount flo
 	return &newTransaction, nil
 }
 
-/*
-对交易进行签名
-*/
+//对交易进行签名
 func (tx *Transaction) SignTx(priv *ecdsa.PrivateKey, utxos []UTXO) (err error) {
+	//如果是coinbase交易,不需要签名
+	if tx.IsCoinBase() {
+		return nil
+	}
+
 	if len(tx.Inputs) != len(utxos) {
 		err = errors.New("签名失败")
 		return err
@@ -136,8 +136,13 @@ func (tx *Transaction) SignTx(priv *ecdsa.PrivateKey, utxos []UTXO) (err error) 
 
 //交易的签名验证方法,该方法返回一个布尔值,ture为验证通过,否则签名不通过
 func (tx *Transaction) VerifyTx(utxos []UTXO) (bool, error) {
+	//如果是coinbase交易,不需要验证
+	if tx.IsCoinBase() {
+		return true, nil
+	}
 
 	if len(tx.Inputs) != len(utxos) {
+		fmt.Println(len(tx.Inputs), len(utxos))
 		return false, errors.New("txInputs length should equal utxos length")
 	}
 	// 验签 : 需要 公钥 签名结果 原始数据 -->  ecdsa.Verify 函数调用
@@ -178,39 +183,39 @@ func (tx *Transaction) VerifyTx(utxos []UTXO) (bool, error) {
 
 //拷贝交易对象实例
 func (tx Transaction) CopyTx() Transaction {
-/*	inputs := make([]TxInput, 0)
-	for _, input := range tx.Inputs {
-		txIn := TxInput{
-			TxId: input.TxId,
-			Vout: input.Vout,
-			PubK: input.PubK,
-			Sig:  input.Sig,
+	/*	inputs := make([]TxInput, 0)
+		for _, input := range tx.Inputs {
+			txIn := TxInput{
+				TxId: input.TxId,
+				Vout: input.Vout,
+				PubK: input.PubK,
+				Sig:  input.Sig,
+			}
+			inputs = append(inputs, txIn)
 		}
-		inputs = append(inputs, txIn)
-	}
 
+		outputs := make([]TxOutput, 0)
+		for _, output := range tx.Outputs {
+			txOut := TxOutput{
+				Value:    output.Value,
+				PubKHash: output.PubKHash,
+			}
+			outputs = append(outputs, txOut)
+		}
+		hash := tx.TxHash
+
+		return Transaction{
+			TxHash:  hash,
+			Inputs:  inputs,
+			Outputs: outputs,
+		}
+
+	*/
 	outputs := make([]TxOutput, 0)
-	for _, output := range tx.Outputs {
-		txOut := TxOutput{
-			Value:    output.Value,
-			PubKHash: output.PubKHash,
-		}
-		outputs = append(outputs, txOut)
-	}
-	hash := tx.TxHash
-
+	inputs := make([]TxInput, 0)
+	copy(tx.Outputs, outputs)
+	copy(tx.Inputs, inputs)
 	return Transaction{
-		TxHash:  hash,
-		Inputs:  inputs,
-		Outputs: outputs,
-	}
-
- */
-	outputs := make([]TxOutput,0)
-	inputs := make([]TxInput,0)
-	copy(tx.Outputs,outputs)
-	copy(tx.Inputs,inputs)
-	return  Transaction{
 		TxHash:  tx.TxHash,
 		Inputs:  inputs,
 		Outputs: outputs,
@@ -221,4 +226,12 @@ func (tx Transaction) CopyTx() Transaction {
 func (tx *Transaction) CalculateTxHash() ([]byte, error) {
 	txBytes, err := utils.Encode(tx)
 	return utils.Hash256(txBytes), err
+}
+
+//判断是否为coinbase交易
+func (tx Transaction) IsCoinBase() bool {
+	if len(tx.Inputs) == 0 && len(tx.Outputs) == 1 {
+		return true
+	}
+	return false
 }
