@@ -30,7 +30,7 @@ type BlockChain struct {
 
 	Wallet *wallet.Wallet //引入钱包管理功能
 
-	UTXOSet utxoset.UTXOSet //引入 UTXO集合
+	UTXOSet *utxoset.UTXOSet //引入 UTXO集合
 }
 
 //创建一条区块链
@@ -54,11 +54,13 @@ func CreateChain(db *bolt.DB) (*BlockChain, error) {
 		fmt.Println("初始化钱包失败,", err.Error())
 		return nil, err
 	}
+	utxoset := utxoset.LoadUTXOSet(db)
 	return &BlockChain{
 		DB:                db,
 		LastBlock:         lastBlock,
 		IteratorBlockHash: lastBlock.Hash,
 		Wallet:            wallet,
+		UTXOSet:           utxoset,
 	}, nil
 }
 
@@ -95,6 +97,8 @@ func (chain *BlockChain) CreateCoinBase(addr string) error {
 	utxos = append(utxos, utxo)
 
 	success, err := chain.UTXOSet.AddUTXOsWithAddr(addr, utxos)
+	fmt.Println("创世区块奖励添加到utxoSet中成功 地址为:",addr)
+	fmt.Println("创世区块奖励添加到utxoSet中成功 金额为:",utxos[0].Value)
 	if !success {
 		fmt.Println("添加 UTXO失败,err: ", err.Error())
 	}
@@ -326,12 +330,12 @@ func (chain *BlockChain) GetBalance(addr string) (float64, error) {
 		return 0.0000, errors.New("非法地址")
 	}
 
-	_, totalBalance := chain.GetUTXOsWithBalance(addr, []transaction.Transaction{})
-
-	//for i,v := range utxos{
-	//	fmt.Printf("第 %d 张 UTXO的 金额 为 %f\n",i,v.Value)
-	//}
-	return totalBalance, nil
+	utxos, balance := chain.GetUTXOsWithBalance(addr, []transaction.Transaction{})
+	//utxos, balance, nil := chain.UTXOSet.QueryUTXOsByAddr(addr)
+	for i,v := range utxos{
+		fmt.Printf("第 %d 张 UTXO的 金额 为 %f\n",i,v.Value)
+	}
+	return balance, nil
 }
 
 // 该方法用于实现地址余额统计和地址所可以花费的utxo集合
@@ -406,7 +410,13 @@ func (chain *BlockChain) SendTransaction(froms []string, tos []string, amounts [
 	//3.遍历交易发起者列表,拿到下标 from_index 每个切片的长度都相同,所以通用
 	for from_index, from := range froms {
 		//3.1 先把from的可花费的utxos给找出来
-		utxos, totalBalance := chain.GetUTXOsWithBalance(from, newTxs)
+		//utxos, totalBalance := chain.GetUTXOsWithBalance(from, newTxs)
+		utxos, totalBalance,err := chain.UTXOSet.QueryUTXOsByAddr(from)
+		if err != nil {
+			fmt.Println("查询地址余额失败:  ",err.Error())
+			return err
+		}
+		fmt.Println("查询到的余额为:", totalBalance)
 
 		//3.2 如果from的钱不够,终止交易
 		if totalBalance < amounts[from_index] {
@@ -480,11 +490,6 @@ func (chain *BlockChain) SendTransaction(froms []string, tos []string, amounts [
 	txall = append(txall, *coinbase)
 	txall = append(txall, newTxs...)
 
-	// 4. 创建区块,把交易切片扔进去
-	err = chain.CreateNewBlock(txall)
-	if err != nil {
-		return err
-	}
 
 	/*该处应该由其他节点完成
 	遍历所有交易,交易输入从utxoset删除,交易输出添加到utxoset中*/
@@ -510,7 +515,7 @@ func (chain *BlockChain) SendTransaction(froms []string, tos []string, amounts [
 			}
 			//如果没被消费,把这个utxo追加到 该地址的UTXO切片中
 			if !isSpent {
-				address := wallet.GetAddressByPubKHash(utxo.PubKHash)
+				address := chain.Wallet.GetAddressByPubKHash(utxo.PubKHash)
 				utxos := utxoSet[address]
 				if len(utxos) == 0 {
 					utxos = make([]transaction.UTXO, 0)
@@ -526,7 +531,7 @@ func (chain *BlockChain) SendTransaction(froms []string, tos []string, amounts [
 			//spendRecord 用于记录一笔地址的消费
 			spendRecord := utxoset.NewSpendRecord(input.TxId, input.Vout)
 
-			address := wallet.GetAddressByPubK(input.PubK)
+			address := chain.Wallet.GetAddressByPubK(input.PubK)
 			//获取某个地址的消费统计结果
 			spendRecords := spendRecordSet[address]
 			if len(spendRecords) == 0 {
@@ -536,6 +541,7 @@ func (chain *BlockChain) SendTransaction(froms []string, tos []string, amounts [
 			spendRecordSet[address] = spendRecords
 		}
 	}
+
 
 	//遍历utxoSet,交易输出添加到utxoSet中
 	for address, utxos := range utxoSet {
@@ -549,7 +555,7 @@ func (chain *BlockChain) SendTransaction(froms []string, tos []string, amounts [
 	}
 
 	//遍历spendRecordSet,交易输入从utxoSet中删除
-	for address,records := range spendRecordSet{
+	for address, records := range spendRecordSet {
 
 		success, err := chain.UTXOSet.DeleteUTXOsWithAddr(address, records)
 		if err != nil {
@@ -559,6 +565,13 @@ func (chain *BlockChain) SendTransaction(froms []string, tos []string, amounts [
 			return errors.New("删除 已经消费的 交易输出 失败 !")
 		}
 	}
+
+	// 4. 创建区块,把交易切片扔进去
+	err = chain.CreateNewBlock(txall)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

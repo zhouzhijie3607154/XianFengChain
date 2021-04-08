@@ -43,10 +43,10 @@ func (wallet *Wallet) NewAddress() (string, error) {
 	}
 
 	//3~5对公钥进行sha256哈希 ripemd160哈希 添加版本号
-	versionPub := GetVersionPubByPubK(keyPair.Pub)
+	versionPub := wallet.GetVersionPubByPubK(keyPair.Pub)
 
 	//6~9.双哈希取校验位后拼接  base58编码
-	address := GetAddressByPubKHash(versionPub)
+	address := wallet.GetAddressByPubKHash(versionPub)
 
 	//10.生成的新地址添加到钱包中
 	wallet.Address[address] = keyPair
@@ -217,6 +217,13 @@ func (wallet *Wallet) GetCoinBase() (addr string) {
 }
 
 //通过原始公钥变换计算出 versionPub
+func (wallet *Wallet) GetVersionPubByPubK(pubk []byte) (versionPub []byte) {
+	hash256 := utils.Hash256(pubk)
+	ripemd160 := utils.HashRipemd160(hash256)
+	versionPub = append(VERSION, ripemd160...)
+	return versionPub
+}
+//通过原始公钥变换计算出 versionPub
 func  GetVersionPubByPubK(pubk []byte) (versionPub []byte) {
 	hash256 := utils.Hash256(pubk)
 	ripemd160 := utils.HashRipemd160(hash256)
@@ -225,7 +232,7 @@ func  GetVersionPubByPubK(pubk []byte) (versionPub []byte) {
 }
 
 //通过 添加了版本号的公钥hash 变换计算得出地址
-func GetAddressByPubKHash(data []byte) (address string) {
+func (wallet *Wallet)GetAddressByPubKHash(data []byte) (address string) {
 	//6、两次哈希
 	firstHash := utils.Hash256(data)
 	secondHash := utils.Hash256(firstHash)
@@ -242,12 +249,12 @@ func GetAddressByPubKHash(data []byte) (address string) {
 	return address
 }
 
-func GetAddressByPubK(pubK []byte)(address string)  {
+func (wallet *Wallet)GetAddressByPubK(pubK []byte)(address string)  {
 	//3~5对公钥进行sha256哈希 ripemd160哈希 添加版本号
-	versionPub := GetVersionPubByPubK(pubK)
+	versionPub := wallet.GetVersionPubByPubK(pubK)
 
 	//6~9.双哈希取校验位后拼接  base58编码
-	address = GetAddressByPubKHash(versionPub)
+	address = wallet.GetAddressByPubKHash(versionPub)
 
 	return address
 }

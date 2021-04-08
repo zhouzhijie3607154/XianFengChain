@@ -44,9 +44,9 @@ func (cmd *CmdClient) Run() {
 	case GETALLADDRESS: //查询所有地址的功能
 		cmd.GetAllAddress()
 
-	case SETCOINBASE:	//设置奖励地址
+	case SETCOINBASE: //设置奖励地址
 		cmd.SetCoinBase()
-	case GETCOINBASE:	//获取奖励地址
+	case GETCOINBASE: //获取奖励地址
 		cmd.GetCoinBase()
 
 	case DUMPPRIKEY:
@@ -88,21 +88,26 @@ func (cmd *CmdClient) GetAllBlocks() {
 		fmt.Println(err.Error())
 		return
 	}
-	fmt.Println("恭喜，查询到所有区块数据")
+	fmt.Println("\t\t\t恭喜，查询到所有区块数据")
+	fmt.Println("当前区块链的高度为:", cmd.Chain.LastBlock.Height)
 	for _, block := range blocks {
-		fmt.Printf("区块高度:%d,区块哈希:%x\n", block.Height, block.Hash)
+		fmt.Printf("\n\t区块高度:%d,区块哈希为:%v\n\n", block.Height, hex.EncodeToString(block.Hash[:][:8]))
 		fmt.Print("区块中的交易信息：\n")
 		for index, tx := range block.Transactions {
-			fmt.Printf("   第%d笔交易,交易hash:%x\n", index, tx.TxHash)
+			fmt.Printf("\t \t第 %d 笔交易,交易hash:%v\n", index, hex.EncodeToString(tx.TxHash[:])[:8])
+
 			for inputIndex, input := range tx.Inputs {
-				fmt.Printf("       第%d笔交易输入,%x花了%x的%d的钱\n", inputIndex, input.PubK, input.TxId, input.Vout)
+				addr := cmd.Chain.Wallet.GetAddressByPubK(input.PubK)
+				fmt.Printf("\t\t\t第 %d 笔交易输入,%v 花了交易哈希为: %v 的 第 %d 个 索引的 %f 个BTC\n",
+					inputIndex, addr[:6], hex.EncodeToString(tx.TxHash[:])[:8], input.Vout,tx.Outputs[inputIndex].Value)
 			}
 			for outputIndex, output := range tx.Outputs {
-				fmt.Printf("       第%d笔交易输出,%x实现收入%f\n", outputIndex, output.PubKHash, output.Value)
+				addr := cmd.Chain.Wallet.GetAddressByPubKHash(output.PubKHash)
+				fmt.Printf("\t\t\t 第 %d 笔交易输出,%v实现收入 %f BTC\n", outputIndex, addr[:6], output.Value)
 			}
 		}
-		fmt.Println()
 	}
+
 }
 
 func (cmd *CmdClient) GetLastBlock() {
@@ -214,10 +219,9 @@ func (cmd *CmdClient) GenerateGensis() {
 	generategensis.StringVar(&addr, "address", "", "用户指定的矿工的地址")
 	generategensis.Parse(os.Args[2:])
 
-
 	//1、先判断该blockchain中是否已存在创世区块
 	hashBig := new(big.Int)
-	hashBig.SetBytes( cmd.Chain.LastBlock.Hash[:])
+	hashBig.SetBytes(cmd.Chain.LastBlock.Hash[:])
 	if hashBig.Cmp(big.NewInt(0)) == 1 {
 		fmt.Println("创世区块已存在，不能重复生成创世区块")
 		return
@@ -266,7 +270,7 @@ func (cmd *CmdClient) GetAllAddress() {
 	//调用功能
 	list := cmd.Chain.Wallet.GetAddressList()
 
-	if len(list) <=0{
+	if len(list) <= 0 {
 		fmt.Println(" 抱歉,钱包中暂无任何地址,您可以通过命令 getnewaddress 来生成一个新地址 ")
 	}
 	//输出所有地址
@@ -275,6 +279,7 @@ func (cmd *CmdClient) GetAllAddress() {
 	}
 
 }
+
 func (cmd *CmdClient) DumpPrivateKey() {
 	//1.解析用户输入的参数
 	dumpPrivateKey := flag.NewFlagSet(DUMPPRIKEY, flag.ExitOnError)
@@ -294,9 +299,9 @@ func (cmd *CmdClient) DumpPrivateKey() {
 	fmt.Println("该地址的私钥为:", hex.EncodeToString(keyPair.Priv.D.Bytes()))
 }
 
-func (cmd CmdClient)SetCoinBase()  {
-	setCoinbase := flag.NewFlagSet(SETCOINBASE,flag.ExitOnError)
-	address := setCoinbase.String("address" ,"","用户自定义的奖励地址")
+func (cmd CmdClient) SetCoinBase() {
+	setCoinbase := flag.NewFlagSet(SETCOINBASE, flag.ExitOnError)
+	address := setCoinbase.String("address", "", "用户自定义的奖励地址")
 	setCoinbase.Parse(os.Args[2:])
 	if len(os.Args[2:]) > 2 {
 		fmt.Println(os.Args)
@@ -305,14 +310,14 @@ func (cmd CmdClient)SetCoinBase()  {
 	}
 	err := cmd.Chain.SetCoinBase(*address)
 	if err != nil {
-		fmt.Println("设置奖励地址失败,请重试!",err.Error())
+		fmt.Println("设置奖励地址失败,请重试!", err.Error())
 		return
 	}
-	fmt.Println("成功设置奖励地址: ",*address)
+	fmt.Println("成功设置奖励地址: ", *address)
 }
 
 func (cmd *CmdClient) GetCoinBase() {
-	getCoinbase := flag.NewFlagSet(SETCOINBASE,flag.ExitOnError)
+	getCoinbase := flag.NewFlagSet(SETCOINBASE, flag.ExitOnError)
 	getCoinbase.Parse(os.Args[2:])
 	if len(os.Args) > 2 {
 		fmt.Println("参数错误,请检查后重试   help 查看更多帮助信息")
@@ -323,5 +328,5 @@ func (cmd *CmdClient) GetCoinBase() {
 		fmt.Println("抱歉,查询coinbase奖励地址失败,请检查后重试")
 		return
 	}
-	fmt.Printf("当前的区块奖励地址为: %v\n " ,addr)
+	fmt.Printf("当前的区块奖励地址为: %v\n ", addr)
 }

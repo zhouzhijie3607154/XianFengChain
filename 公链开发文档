@@ -356,6 +356,21 @@ bug : gob -> []byte -->sha256 --> TxHash
 
     集成:
     QueryUTXOsByAddr    : 发送交易前查询
-    AddUTXOsWithAddress : 发送交易
-    DeleteUTXOsWithAddr
+    AddUTXOsWithAddress : 发送交易后
+    DeleteUTXOsWithAddr : 发送交易后
+
+    发送交易前先查询 付款人的所有可用utxo
+    交易发送成功后,将付款人消费的utxo 从set中删除
+    交易发送成功后,将付款人的找零和收款人的utxo添加到utxoset中
+测试:
+
+E:\Code\Golang\GoProjects\src\2021\_03_公链\XianFengChain04>go run main.go getnewaddress
+生成新的地址： 16BAwfr51DACPCmC4tnbxHATXXzRpXRr6K
+
+E:\Code\Golang\GoProjects\src\2021\_03_公链\XianFengChain04>go run main.go generategenesis -address 16BAwfr51DACPCmC4tnbxHATXXzRpXRr6K
+恭喜！生成了一笔COINBASE交易，奖励已到账。
+
+E:\Code\Golang\GoProjects\src\2021\_03_公链\XianFengChain04>go run main.go getnewaddress
+生成新的地址： 1HCBf1ShJWkUL62BRbbnCXSW4tWdBGpnxX
+
 

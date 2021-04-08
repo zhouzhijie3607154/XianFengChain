@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"errors"
+	"fmt"
 	"github.com/boltdb/bolt"
 )
 
@@ -18,10 +19,14 @@ type UTXOSet struct {
 	Engine *bolt.DB
 }
 
-//查询某个地址的所有可用UTXO
-func (utxoset UTXOSet) QueryUTXOsByAddr(address string) ([]transaction.UTXO, error) {
-	var utxos = make([]transaction.UTXO, 8)
-	var err error
+func LoadUTXOSet(db *bolt.DB) *UTXOSet  {
+	return &UTXOSet{Engine: db}
+}
+
+//查询某个地址的所有可用UTXO集合,统计的utxo金额,和一个可能遇到的err
+func (utxoset UTXOSet) QueryUTXOsByAddr(address string) (utxos []transaction.UTXO,totalBalance float64,err error) {
+	fmt.Println("queryUTXO 收到的参数为: ",address)
+	utxos = make([]transaction.UTXO, 0)
 	err = utxoset.Engine.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(UTXOSET))
 		if bucket == nil {
@@ -32,14 +37,20 @@ func (utxoset UTXOSet) QueryUTXOsByAddr(address string) ([]transaction.UTXO, err
 		if len(utxosBytes) <= 0 {
 			return nil
 		} //未查到该地址的UTXO数据
+
 		decoder := gob.NewDecoder(bytes.NewReader(utxosBytes))
 		err = decoder.Decode(&utxos)
+		fmt.Println("解码后的utxo有多少张: ",len(utxos))
+		for i,v := range utxos{
+			fmt.Printf("第 %d 张utxo 的 金额为 : %f\n",i,v.Value)
+		}
 
 		return err
-
 	})
-
-	return utxos, err
+	for _, utxo := range utxos {
+		totalBalance += utxo.Value
+	}
+	return utxos, totalBalance, err
 }
 
 //当某个地址有新的 UTXO时,把新产生的UTXO存入到UTXOSet中
@@ -59,7 +70,7 @@ func (utxoset UTXOSet) AddUTXOsWithAddr(address string, newUTXOs []transaction.U
 		// 该address 之前已存有 UTXO在set中,不能直接覆盖
 		if len(utxosBytes) != 0 {
 			decoder := gob.NewDecoder(bytes.NewReader(utxosBytes))
-			err = decoder.Decode(utxosAll)
+			err = decoder.Decode(&utxosAll)
 		}
 		//把新产生的utxo追加到该地址的utxo切片中,再序列化存到db文件中
 		utxosAll := append(utxosAll, newUTXOs...)
@@ -125,7 +136,7 @@ func (utxoset UTXOSet) DeleteUTXOsWithAddr(address string, records []SpendRecord
 		return err
 	})
 
-	return err != nil, err
+	return err == nil, err
 }
 
 func IsSubUTXOs(utxos []transaction.UTXO, records []SpendRecord) bool {
